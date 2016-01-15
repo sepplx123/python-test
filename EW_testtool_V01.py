@@ -40,7 +40,7 @@ class Database():
 
 
         x = 0
-        with open('test.csv','r') as csvfile:
+        with open('test2.csv','r') as csvfile:
             source_data = csv.reader(csvfile, delimiter=str(','))
             for line in source_data:
                 #dates.append(mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()))
@@ -90,7 +90,7 @@ class Test():
         self.db= []
         
         self.main_direction = []
-        self.subdirection = []
+        self.sub_direction = []
         self.item_marker = []
 
         self.list_aussenstab = []
@@ -101,17 +101,18 @@ class Test():
             self.db.append(_temp)
             
             self.main_direction.append([])
-            self.subdirection.append([])
+            self.sub_direction.append([])
             self.item_marker.append([[],[],[]])
 
         print('Database entries:', len(self.db))
         print('##############################################################')
         self.test_mainloop()
-        for index in range(len(self.db)):
-            print('==>',index, self.main_direction[index],self.subdirection[index],self.item_marker[index])
-        print('##############################################################')
+        #for index in range(len(self.db)):
+        #    print("==>{0:>5} {1:<15} {2:<15} {3:<20}".format("Index","main_direction","sub_direction","item_marker"))
+        #print('##############################################################')
 
         self.ausgabe()
+        self.sub_dir_classification()
         ###########################
         
     def get_minimum(self, list_):
@@ -149,12 +150,13 @@ class Test():
             return False       
 
     def mark_items(self,item1,item2):
-        # item_marker [ [0] [1][0] [1][1] [2] ]
+        """
+        # item_marker [ [0], [[1][0], [1][1]], [2] ]
         # - [0]     Aussenstab
         # - [1][0]  verschachtelung des Innenstabs 
         # - [1][1]  Zuordnung zum Aussenstab
         # - [2]     lfd. Nummer des Innenstabs
-        
+        """
         if item1 not in self.list_aussenstab:
             self.list_aussenstab.insert(0, item1)
         if item2 not in self.list_innenstab:    
@@ -169,7 +171,7 @@ class Test():
             _counter += 1
         else:
             _counter = 1
-        _temp = [str("v"+str(_counter)+"_Innenstab"), item1]
+        _temp = [str("Innenstab"), item1]
         self.item_marker[item2][1] = _temp
         self.item_marker[item2][2] = _counter        
 
@@ -207,7 +209,7 @@ class Test():
         for item in range(len(self.db)):
             if item == 0:
                     self.main_direction[item] = []
-                    self.subdirection[item] = []
+                    self.sub_direction[item] = []
                     self.item_marker[item] = [[],[],[]]
             else:
                 #Step1.1 check if the list aussenstab already exists and check item for innenstab
@@ -224,16 +226,17 @@ class Test():
                 #Step1.4 mark the relevant items if true
                 if result2:
                     self.mark_items(item-1, item)
+                """    
                 else:   # fix for wrong markings bei verschachtelten innenstaeben 
                     _counter = self.item_marker[item][2]
                     if _counter:
                         #print('________________________try to apply fix for _counter:', self.item_marker[item])
                         self.item_marker[item][1][0] = self.item_marker[item-1][1][0]    # get string from Innenstab before this one
                         #print('________________________fix executed:', self.item_marker[item])
-
+                """
 
                 self.main_direction[item] = result
-                #print('==>',item, ' direction:',self.main_direction[item],' subdirection:', self.subdirection[item],' item_marker:', self.item_marker[item])
+                #print('==>',item, ' direction:',self.main_direction[item],' sub_direction:', self.sub_direction[item],' item_marker:', self.item_marker[item])
 
 
     def ausgabe(self):
@@ -292,6 +295,101 @@ class Test():
         #print('aussenstaebe_up_lim:',self.aussenstaebe_up_lim)
         #print('aussenstaebe_low_lim:',self.aussenstaebe_low_lim)
 
+
+    def sub_dir_classification(self):
+        """
+        # item_marker [ [0], [[1][0], [1][1]], [2] ]
+        # - [0]     Aussenstab
+        # - [1][0]  verschachtelung des Innenstabs 
+        # - [1][1]  Zuordnung zum Aussenstab
+        # - [2]     lfd. Nummer des Innenstabs
+        
+        self.main_direction
+        self.sub_direction
+        self.item_marker
+        self.db ==> O H L C
+        """
+        self.mark_4later = []
+        self.missing_dir = []
+        mark_2_delete = []
+        
+        for item in range(len(self.main_direction)):
+            self.subdir_testcase1(item)
+            self.subdir_testcase2(item)
+            self.subdir_testcase3(item)
+            #print("==>{0:>5}  {1:20} {2:<15} {3:<20}".format(item,self.main_direction[item],self.sub_direction[item],self.item_marker[item]))
+            
+        print('_______self.mark_4later:',len(self.mark_4later),self.mark_4later)
+        print('_______try to fix self.mark_4later items in 2nd check loop:',len(self.mark_4later),self.mark_4later)
+        
+        for item in range(len(self.mark_4later)):
+            #print('try to fix self.mark_4later: start', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase1(self.mark_4later[item])
+            #print('try to fix self.mark_4later: case1', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase2(self.mark_4later[item])
+            #print('try to fix self.mark_4later: case2', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase3(self.mark_4later[item])
+            #print('try to fix self.mark_4later: case3', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+
+            if self.sub_direction[self.mark_4later[item]]:
+                mark_2_delete.append(self.mark_4later[item])
+                
+        for item in mark_2_delete:
+            self.mark_4later.remove(item)
+            
+        print('_______self.mark_4later that could not be finished!!!!:',len(self.mark_4later), self.mark_4later)
+
+
+        ###### summary
+        print("==>{0:>5}  {1:<20} {2:<15} {3:<20}".format("Index","main_direction","sub_direction","item_marker"))
+        for item in range(len(self.sub_direction)):
+            print("==>{0:>5}  {1:20} {2:<15} {3:<20}".format(item,self.main_direction[item],self.sub_direction[item],self.item_marker[item]))
+            if not self.sub_direction[item]:
+                self.missing_dir.append(item)
+        print('_______self.missing_dir:',len(self.missing_dir), self.missing_dir)
+        ####################
+
+    def subdir_testcase1(self, item):
+        """ The easiest case. Only "up" or "down" available in main_direction"""
+        if len(self.main_direction[item]) == 1 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]): 
+            self.sub_direction[item] = self.main_direction[item]
+
+        
+    def subdir_testcase2(self, item):       
+        """ main_direction has "up" and "down" available. So we can check main_direction of partners or mark4later """                
+        if len(self.main_direction[item]) == 2 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]):
+            
+            if len(self.main_direction[item-1]) == 1 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]) and item > 0: 
+                self.sub_direction[item] = self.main_direction[item-1]
+            elif len(self.main_direction[item+1]) == 1 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]) and item < len(self.main_direction)-1:
+                self.sub_direction[item] = self.main_direction[item+1]
+            else:
+                if item not in self.mark_4later:
+                    self.mark_4later.append(item)
+                    print('===> mark_4later case detected:  index:', item, self.main_direction[item+1])
+                else:
+                    print('==> no direction found for item:', item)
+
+
+    def subdir_testcase3(self, item):
+        """ main_direction not available. So we can check sub_direction of partners or mark4later """
+        if not self.main_direction[item]:
+            if len(self.main_direction[item-1]) == 1 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]) and item > 0:
+                self.sub_direction[item] = self.main_direction[item-1]
+            elif len(self.main_direction[item+1]) == 1 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]) and item < len(self.main_direction)-1:
+                self.sub_direction[item] = self.main_direction[item+1]
+            elif self.sub_direction[item-1] and item > 0:
+                self.sub_direction[item] = self.sub_direction[item-1]                                                   
+            elif self.sub_direction[item+1] and item < len(self.main_direction)-1:
+                self.sub_direction[item] = self.sub_direction[item+1]
+            else:
+                if item not in self.mark_4later:
+                    self.mark_4later.append(item)
+                    print('===> mark_4later case detected:  index:', item, self.sub_direction[item+1])
+                else:
+                    print('==> no direction found for item:', item)
+
+        
 
 ############
 if __name__ == "__main__":
