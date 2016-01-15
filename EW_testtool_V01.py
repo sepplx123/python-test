@@ -18,7 +18,8 @@ import urllib2
 import datetime as dt
 import csv
 
-import fibonacci
+import sys
+import EW_fibonacci
 
 
 
@@ -109,6 +110,8 @@ class Test():
         for index in range(len(self.db)):
             print('==>',index, self.main_direction[index],self.subdirection[index],self.item_marker[index])
         print('##############################################################')
+
+        self.ausgabe()
         ###########################
         
     def get_minimum(self, list_):
@@ -146,14 +149,16 @@ class Test():
             return False       
 
     def mark_items(self,item1,item2):
-        # Aussenstab [0]
-        # Innenstab [1]
-        # Nummer des Innenstabs [2]
+        # item_marker [ [0] [1][0] [1][1] [2] ]
+        # - [0]     Aussenstab
+        # - [1][0]  verschachtelung des Innenstabs 
+        # - [1][1]  Zuordnung zum Aussenstab
+        # - [2]     lfd. Nummer des Innenstabs
         
         if item1 not in self.list_aussenstab:
-            self.list_aussenstab.append(item1)
+            self.list_aussenstab.insert(0, item1)
         if item2 not in self.list_innenstab:    
-            self.list_innenstab.append(item2)
+            self.list_innenstab.insert(0, item2)
 
 
         _temp = str("Aussenstab")
@@ -164,7 +169,7 @@ class Test():
             _counter += 1
         else:
             _counter = 1
-        _temp = str("v"+str(_counter)+"_Innenstab("+str(item1)+")")
+        _temp = [str("v"+str(_counter)+"_Innenstab"), item1]
         self.item_marker[item2][1] = _temp
         self.item_marker[item2][2] = _counter        
 
@@ -223,7 +228,7 @@ class Test():
                     _counter = self.item_marker[item][2]
                     if _counter:
                         #print('________________________try to apply fix for _counter:', self.item_marker[item])
-                        self.item_marker[item][1] = self.item_marker[item-1][1]    # get string from Innenstab before this one
+                        self.item_marker[item][1][0] = self.item_marker[item-1][1][0]    # get string from Innenstab before this one
                         #print('________________________fix executed:', self.item_marker[item])
 
 
@@ -231,7 +236,63 @@ class Test():
                 #print('==>',item, ' direction:',self.main_direction[item],' subdirection:', self.subdirection[item],' item_marker:', self.item_marker[item])
 
 
-            
+    def ausgabe(self):
+        self.aussenstaebe_up_lim = {}
+        self.aussenstaebe_low_lim = {}
+
+        for item in range(len(self.item_marker)):
+            if self.item_marker[item][0]:
+                self.aussenstaebe_up_lim[item] = [[],[]]
+                self.aussenstaebe_low_lim[item] = [[],[]]
+
+                _temp2 = self.get_maximum(self.db[item])
+                self.aussenstaebe_up_lim[item][0].append(item)
+                self.aussenstaebe_up_lim[item][1].append(_temp2)
+
+                _temp2 = self.get_minimum(self.db[item])
+                self.aussenstaebe_low_lim[item][0].append(item)
+                self.aussenstaebe_low_lim[item][1].append(_temp2)
+                                
+                #print(item)
+                #print('aussenstaebe_up_lim', self.aussenstaebe_up_lim[item], self.get_maximum(self.db[item]))
+                #print('aussenstaebe_low_lim',self.aussenstaebe_low_lim[item],self.get_minimum(self.db[item]))
+                
+            try:
+                if self.item_marker[item][1][1]:
+                    _temp = self.item_marker[item][1][1]
+                    #print('______try Pfad: _temp',_temp, 'item', item)
+
+                    _temp2 = self.get_maximum(self.db[_temp])
+                    self.aussenstaebe_up_lim[_temp][0].append(item)
+                    self.aussenstaebe_up_lim[_temp][1].append(_temp2)
+                                
+                    _temp2 = self.get_minimum(self.db[_temp])
+                    self.aussenstaebe_low_lim[_temp][0].append(item)
+                    self.aussenstaebe_low_lim[_temp][1].append(_temp2)
+
+                #print(self.db[item])
+                #print('aussenstaebe_up_lim', self.aussenstaebe_up_lim[_temp], self.get_maximum(self.db[item]))
+                #print('aussenstaebe_low_lim',self.aussenstaebe_low_lim[_temp],self.get_minimum(self.db[item]))
+                
+            except IndexError:
+                pass
+            except:
+                (type, value, traceback) = sys.exc_info()
+                print("Unexpected error:")
+                print("Type: ", type)
+                print("Value: ", value)
+                print("traceback: ", traceback)
+                raise
+
+
+        #for item in self.aussenstaebe_up_lim:
+        #    print('aussenstaebe_up_lim:', item, self.aussenstaebe_up_lim[item])
+        #for item in self.aussenstaebe_low_lim:
+        #    print('aussenstaebe_low_lim:', item, self.aussenstaebe_low_lim[item])           
+        #print('aussenstaebe_up_lim:',self.aussenstaebe_up_lim)
+        #print('aussenstaebe_low_lim:',self.aussenstaebe_low_lim)
+
+
 ############
 if __name__ == "__main__":
     datensammlung = Database()
