@@ -66,24 +66,6 @@ class Database():
 ################################       
 ################################
 ################################
-class Classification():
-    def __init__(self,index):
-        self.index = index        
-        self.main_direction = []
-        self.subdirection = []
-        self.item_marker = []
-
-
-
-class Innenstab(Classification):
-    def __init__(self):
-        self.aussenstab_index = 0
-        self.innenstab_counter = 0
-
-
-################################       
-################################
-################################
 class Test():
     def __init__(self, database):
         self.raw_values = database
@@ -93,6 +75,7 @@ class Test():
         self.sub_direction = []
         self.final_direction = []
         self.item_marker = []
+        self.bar_color = []
 
         self.list_aussenstab = []
         self.list_innenstab = []
@@ -105,6 +88,7 @@ class Test():
             self.sub_direction.append([])
             self.final_direction.append([])
             self.item_marker.append([[],[],[]])
+            self.bar_color.append([])
 
         print('Database entries:', len(self.db))
         print('########################################################################################################################')
@@ -115,9 +99,10 @@ class Test():
         self.create_test_lines()
 
 
-        
+        print('########################################################################################################################')
+        print("{0:>5}  {1:<20} {2:<25} {3:<10} {4:<10} {5:<40}".format("Index","main_dir","sub_dir","final_dir","bar_color","item_marker"))
         for item in range(len(self.db)):
-            print("{0:>5}  {1:20} {2:<15} {3:<15} {4:<40}".format(item,self.main_direction[item],self.sub_direction[item],self.final_direction[item],self.item_marker[item]))
+            print("{0:>5}  {1:20} {2:<25} {3:<10} {4:<10} {5:<40}".format(item,self.main_direction[item],self.sub_direction[item],self.final_direction[item],self.bar_color[item],self.item_marker[item]))
         print('########################################################################################################################')
         ###########################
         
@@ -129,10 +114,13 @@ class Test():
 
         # Step1: check direction, and classify items
         for item in range(len(self.db)):
+            #Step0: Classify if item is red or green bar
+            self.bar_color[item] = self.check_bar_color(item)
+            
             if item == 0:
                     self.main_direction[item] = []
                     self.sub_direction[item] = []
-                    self.item_marker[item] = [[],[],[]]
+                    self.item_marker[item] = [[],[],[],[]]
             else:
                 #Step1.1 check if the list aussenstab already exists and check item for innenstab
                 if self.list_aussenstab:
@@ -241,6 +229,13 @@ class Test():
     def get_maximum(self, list_):
         return max(list_)
 
+    def check_bar_color(self, item_):
+        """   self.db ==> O H L C   """
+        if self.db[item_][0] < self.db[item_][3]:
+            return str("green")
+        else:
+            return str("red")
+
 ##################################################################################################################################
 ##################################################################################################################################
 ##################################################################################################################################
@@ -251,67 +246,200 @@ class Test():
         # - [1][0]  verschachtelung des Innenstabs 
         # - [1][1]  Zuordnung zum Aussenstab
         # - [2]     lfd. Nummer des Innenstabs
+
+        # sub_direction [0, 1, 2, 3, 4, 5]
+        # 0 = direction set in testcase1
+        # 1 = direction set in testcase2
+        # 2 = direction set in testcase3
+        # 3 = direction set in the 2nd loop (variable = _loop_inidcator)
+        # 4 = direction set in the 3nd loop (variable = _loop_inidcator)
+        # 5 = direction set in the 4nd loop (variable = _loop_inidcator)
         
         self.main_direction
-        self.sub_direction
-        self.item_marker
         self.db ==> O H L C
         """
+        
         self.mark_4later = []
         self.missing_dir = []
         mark_2_delete = []
-        
+
+        _loop_inidcator = 0 # indexoffset for sub_direction to get the right index in a 2nd loop
         for item in range(len(self.main_direction)):
-            self.subdir_testcase1(item)
-            self.subdir_testcase2(item)
-            self.subdir_testcase3(item)
+            self.sub_direction[item] = [str(),str(),str(),str(),str(),str(),str(),str()]   # create an empty entry
+            self.subdir_testcase1(item, _loop_inidcator)
+            self.subdir_testcase2(item, _loop_inidcator)
+            self.subdir_testcase3(item, _loop_inidcator)
             #print("{0:>5}  {1:20} {2:<15} {3:<40}".format(item,self.main_direction[item],self.sub_direction[item],self.item_marker[item]))
             
-        print('_______self.mark_4later:',len(self.mark_4later),self.mark_4later)
-        print('_______try to fix self.mark_4later items in 2nd check loop:',len(self.mark_4later),self.mark_4later)
+        #print('_______self.mark_4later that could not be finished in 1st loop!!!!:',len(self.mark_4later), self.mark_4later)
         
+        mark_2_delete = []
+        _loop_inidcator = 3 # indexoffset for sub_direction to get the right index in a 2nd loop
         for item in range(len(self.mark_4later)):
             #print('try to fix self.mark_4later: start', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
-            self.subdir_testcase1(self.mark_4later[item])
-            #print('try to fix self.mark_4later: case1', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
-            self.subdir_testcase2(self.mark_4later[item])
-            #print('try to fix self.mark_4later: case2', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
-            self.subdir_testcase3(self.mark_4later[item])
-            #print('try to fix self.mark_4later: case3', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
-
-            if self.sub_direction[self.mark_4later[item]]:
+            self.subdir_testcase1(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case1 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase2(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case2 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase3(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case3 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            
+            if self.sub_direction[self.mark_4later[item]][_loop_inidcator]:
+                print(self.mark_4later[item], _loop_inidcator, self.sub_direction[self.mark_4later[item]])
                 mark_2_delete.append(self.mark_4later[item])
                 
         for item in mark_2_delete:
             self.mark_4later.remove(item)
             
-        print('_______self.mark_4later that could not be finished!!!!:',len(self.mark_4later), self.mark_4later)
+        #print('_______self.mark_4later that could not be finished in 2nd loop!!!!:',len(self.mark_4later), self.mark_4later)
+        
+        mark_2_delete = []
+        _loop_inidcator = 4 # indexoffset for sub_direction to get the right index in a 2nd loop
+        for item in range(len(self.mark_4later)):
+            #print('try to fix self.mark_4later: start', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase1(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case1 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase2(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case2 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase3(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case3 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            
+            if self.sub_direction[self.mark_4later[item]][_loop_inidcator]:
+                print(self.mark_4later[item], _loop_inidcator, self.sub_direction[self.mark_4later[item]])
+                mark_2_delete.append(self.mark_4later[item])
 
+        for item in mark_2_delete:
+            self.mark_4later.remove(item)
+        #print('_______self.mark_4later that could not be finished in 3rd loop!!!!:',len(self.mark_4later), self.mark_4later)
+        
+        mark_2_delete = []
+        _loop_inidcator = 5 # indexoffset for sub_direction to get the right index in a 2nd loop
+        for item in range(len(self.mark_4later)):
+            #print('try to fix self.mark_4later: start', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase1(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case1 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase2(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case2 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase3(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case3 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            
+            if self.sub_direction[self.mark_4later[item]][_loop_inidcator]:
+                print(self.mark_4later[item], _loop_inidcator, self.sub_direction[self.mark_4later[item]])
+                mark_2_delete.append(self.mark_4later[item])
+                
+        for item in mark_2_delete:
+            self.mark_4later.remove(item)
+        #print('_______self.mark_4later that could not be finished in 4th loop!!!!:',len(self.mark_4later), self.mark_4later)
+
+        mark_2_delete = []
+        _loop_inidcator = 6 # indexoffset for sub_direction to get the right index in a 2nd loop
+        for item in range(len(self.mark_4later)):
+            #print('try to fix self.mark_4later: start', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase1(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case1 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase2(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case2 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase3(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case3 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            
+            if self.sub_direction[self.mark_4later[item]][_loop_inidcator]:
+                print(self.mark_4later[item], _loop_inidcator, self.sub_direction[self.mark_4later[item]])
+                mark_2_delete.append(self.mark_4later[item])
+                
+        for item in mark_2_delete:
+            self.mark_4later.remove(item)
+        #print('_______self.mark_4later that could not be finished in 5th loop!!!!:',len(self.mark_4later), self.mark_4later)
+
+        mark_2_delete = []
+        _loop_inidcator = 7 # indexoffset for sub_direction to get the right index in a 2nd loop
+        for item in range(len(self.mark_4later)):
+            #print('try to fix self.mark_4later: start', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase1(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case1 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase2(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case2 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            self.subdir_testcase3(self.mark_4later[item], _loop_inidcator)
+            #print('try to fix self.mark_4later: case3 done', item, self.mark_4later[item], self.sub_direction[self.mark_4later[item]])
+            
+            if self.sub_direction[self.mark_4later[item]][_loop_inidcator]:
+                print(self.mark_4later[item], _loop_inidcator, self.sub_direction[self.mark_4later[item]])
+                mark_2_delete.append(self.mark_4later[item])
+                
+        for item in mark_2_delete:
+            self.mark_4later.remove(item)
+        #print('_______self.mark_4later that could not be finished in 6th loop!!!!:',len(self.mark_4later), self.mark_4later)
 
         ###### summary
         #print("{0:>5}  {1:<20} {2:<15} {3:<15} {4:<40}".format("Index","main_direction","sub_direction","final_direction","item_marker"))
         for item in range(len(self.sub_direction)):
-        #    print("{0:>5}  {1:20} {2:<15} {3:<15} {4:<40}".format(item,self.main_direction[item],self.sub_direction[item],self.final_direction[item],self.item_marker[item]))
+            #print("{0:>5}  {1:20} {2:<15} {3:<15} {4:<40}".format(item,self.main_direction[item],self.sub_direction[item],self.final_direction[item],self.item_marker[item]))
             if not self.sub_direction[item]:
                 self.missing_dir.append(item)
         print('_______self.missing_dir:',len(self.missing_dir), self.missing_dir)
-        print("{0:>5}  {1:<20} {2:<15} {3:<15} {4:<40}".format("Index","main_direction","sub_direction","final_direction","item_marker"))
         ####################
 
-    def subdir_testcase1(self, item):
+    def subdir_testcase1(self, item, _loop_inidcator):
         """ The easiest case. Only "up" or "down" available in main_direction"""
+        if _loop_inidcator:
+            _index = _loop_inidcator
+        else:
+            _index = 0
+        
         if len(self.main_direction[item]) == 1 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]): 
-            self.sub_direction[item] = self.main_direction[item]
+            self.sub_direction[item][_index] = self.main_direction[item][0]
 
         
-    def subdir_testcase2(self, item):       
-        """ main_direction has "up" and "down" available. So we can check main_direction of partners or mark4later """                
+    def subdir_testcase2(self, item, _loop_inidcator):       
+        """ main_direction has "up" and "down" available. So we can check main_direction of partners or mark4later """
+        if _loop_inidcator:
+            _index = _loop_inidcator
+        else:
+            _index = 1
+            
         if len(self.main_direction[item]) == 2 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]):
             
-            if len(self.main_direction[item-1]) == 1 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]) and item > 0: 
-                self.sub_direction[item] = self.main_direction[item-1]
-            elif len(self.main_direction[item+1]) == 1 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]) and item < len(self.main_direction)-1:
-                self.sub_direction[item] = self.main_direction[item+1]
+            if ("down" in [element for element in self.sub_direction[item-1] if element]) and (
+                "down" in [element for element in self.sub_direction[item+1] if element]) and (
+                self.get_minimum(self.db[item+1]) < self.get_minimum(self.db[item])) :
+                self.sub_direction[item][_index] = str("up")
+                print('+++++++++++++++++++++Pfad1',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
+                
+            elif ("down" in [element for element in self.sub_direction[item-1] if element]) and (
+                "down" in [element for element in self.sub_direction[item+1] if element]) and (
+                self.get_minimum(self.db[item+1]) > self.get_minimum(self.db[item])) :
+                self.sub_direction[item][_index] = str("down")
+                print('+++++++++++++++++++++Pfad2',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
+                
+            elif ("up" in [element for element in self.sub_direction[item-1] if element]) and (
+                "up" in [element for element in self.sub_direction[item+1] if element]) and (
+                self.get_maximum(self.db[item+1]) > self.get_maximum(self.db[item])) :
+                self.sub_direction[item][_index] = str("down")
+                print('+++++++++++++++++++++Pfad3',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
+
+            elif ("up" in [element for element in self.sub_direction[item-1] if element]) and (
+                "up" in [element for element in self.sub_direction[item+1] if element]) and (
+                self.get_maximum(self.db[item+1]) < self.get_maximum(self.db[item])) :
+                self.sub_direction[item][_index] = str("up")
+                print('+++++++++++++++++++++Pfad4',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
+
+            elif ("down" in [element for element in self.sub_direction[item+1] if element]):
+                self.sub_direction[item][_index] = str("up")
+                print('+++++++++++++++++++++++++++',item, 'Pfad 5')
+
+                
+            elif "up" in [element for element in self.sub_direction[item+1] if element]:
+                self.sub_direction[item][_index] = str("down")
+
+            
+##            if self.bar_color[item-1] == "red" and self.bar_color[item+1] == "red": # if both the same color, this bar need to be switched
+##                self.sub_direction[item][_index] = str("up")
+##            elif self.bar_color[item-1] == "green" and self.bar_color[item+1] == "green": # if both the same color, this bar need to be switched
+##                self.sub_direction[item][_index] = str("down")
+##            elif self.bar_color[item-1] == "red":
+##                self.sub_direction[item][_index] = str("down") # if the colors are different, the bar should follow the path from the bar before
+##            elif self.bar_color[item-1] == "green":
+##                self.sub_direction[item][_index] = str("up")   # if the colors are different, the bar should follow the path from the bar before
+                    
             else:
                 if item not in self.mark_4later:
                     self.mark_4later.append(item)
@@ -320,17 +448,46 @@ class Test():
                     print('==> no direction found for item:', item)
 
 
-    def subdir_testcase3(self, item):
+    def subdir_testcase3(self, item, _loop_inidcator):
         """ main_direction not available. So we can check sub_direction of partners or mark4later """
+        if _loop_inidcator:
+            _index = _loop_inidcator
+        else:
+            _index = 2
+        
         if not self.main_direction[item]:
-            if len(self.main_direction[item-1]) == 1 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]) and item > 0:
-                self.sub_direction[item] = self.main_direction[item-1]
-            elif len(self.main_direction[item+1]) == 1 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]) and item < len(self.main_direction)-1:
-                self.sub_direction[item] = self.main_direction[item+1]
-            elif self.sub_direction[item-1] and item > 0:
-                self.sub_direction[item] = self.sub_direction[item-1]                                                   
-            elif self.sub_direction[item+1] and item < len(self.main_direction)-1:
-                self.sub_direction[item] = self.sub_direction[item+1]
+            
+            if len(self.main_direction[item-1]) == 1 and "up" in self.main_direction[item-1]:
+                self.sub_direction[item][_index] = str("down")
+            elif len(self.main_direction[item-1]) == 1 and "down" in self.main_direction[item-1]:
+                self.sub_direction[item][_index] = str("up")
+            elif "up" in [element for element in self.sub_direction[item-1] if element]:
+                self.sub_direction[item][_index] = str("down")
+            elif "down" in [element for element in self.sub_direction[item-1] if element]:
+                self.sub_direction[item][_index] = str("up")   
+
+            elif ("up" in [element for element in self.sub_direction[item+1] if element]) and (self.get_maximum(self.db[item+1]) > self.get_maximum(self.db[item])):
+                self.sub_direction[item][_index] = str("up")
+            elif ("up" in [element for element in self.sub_direction[item+1] if element]) and (self.get_maximum(self.db[item+1]) < self.get_maximum(self.db[item])):
+                self.sub_direction[item][_index] = str("down")
+                
+            elif ("down" in [element for element in self.sub_direction[item+1] if element]) and (self.get_minimum(self.db[item+1]) < self.get_minimum(self.db[item])):
+                self.sub_direction[item][_index] = str("down")
+            elif ("down" in [element for element in self.sub_direction[item+1] if element]) and (self.get_minimum(self.db[item+1]) > self.get_minimum(self.db[item])):
+                self.sub_direction[item][_index] = str("up")
+
+            
+##
+##            elif len(self.main_direction[item+1]) == 1 and "up" in self.main_direction[item+1]:
+##                self.sub_direction[item][_index] = str("down")
+##            elif len(self.main_direction[item+1]) == 1 and "down" in self.main_direction[item+1]:
+##                self.sub_direction[item][_index] = str("up")
+##            elif "up" in [element for element in self.sub_direction[item+1] if element]:
+##                self.sub_direction[item][_index] = str("down")
+##            elif "down" in [element for element in self.sub_direction[item+1] if element]:
+##                self.sub_direction[item][_index] = str("up")
+
+
             else:
                 if item not in self.mark_4later:
                     self.mark_4later.append(item)
@@ -344,10 +501,12 @@ class Test():
     def final_dir_classification(self):
         """ Sets final direction according to main_direction and sub_direction entries """
         for item in range(len(self.final_direction)):
-            if self.sub_direction[item]:
-                self.final_direction[item] = self.sub_direction[item]
+            
+            if [element for element in self.sub_direction[item] if element]:
+                self.final_direction[item] = [element for element in self.sub_direction[item] if element][0]
             else:
-                print('==> no direction found for item:', item)
+                print('==> no direction found! Temporary use ==>  "up"  for item!', item)
+                self.final_direction[item] = str("up")  # !!!!!!!!!!!!!!!!
 
 ##################################################################################################################################
 ##################################################################################################################################
@@ -412,15 +571,93 @@ class Test():
 ##################################################################################################################################
 ##################################################################################################################################        
     def create_test_lines(self):
-        """ Creates lines in the graph """
-        pass
+        """ Creates lines in the graph
+        self.line_dict = {[0, 1, 2]}
+        0 = final_direction
+        1 = start point of the line
+        2 = end point of the line
+
+        self.line_coords = {[x], [y]}
+        # If direction == 'up' Start is Minimum and End is Maximum of the Index
+        """
+        self.line_dict = {}
+        self.line_coords = {}
 
 
+        self.parse_directions()
 
 
+    def parse_directions(self):
+        act_key = False
+        last_key = False
+        line_id = 0
+        line_in_progress = False
 
-
+        #print("{0:>5} {1:>10}    {2:<25}  {3:<20}".format("Index","key","line_dict","line_coords"))
+        
+        for item in range(1,len(self.final_direction)):
+            act_key = self.final_direction[item]
             
+            # Step1.1: If line_in_progress: search for a changing direction to add the end point to the dict
+            # Step1.2: If last item and line_in_progress 0==> also add the end point in the dict          
+            if (act_key != last_key or item == len(self.final_direction)-1) and line_in_progress:
+                line_in_progress = False
+                
+                if item != len(self.final_direction)-1: #Fix for last item
+                    self.line_dict[line_id][2] = item-1 #Save the last item with the same direction and not with the new one!
+                else:
+                    self.line_dict[line_id][2] = item   #Fix for last item
+                
+                # Step1.3: Also Create a item in the line_coords dict for creating a graph
+                # If direction == 'up': the end the maximum
+                # If direction == 'down': the end the minimum
+                if self.line_dict[line_id][0] == 'up':
+                    _index = self.line_dict[line_id][2]
+                    _list = self.db[_index]
+                    _end = self.get_maximum(_list)
+                    self.line_coords[line_id][0].append(_index)
+                    self.line_coords[line_id][1].append(_end)
+                    
+                elif self.line_dict[line_id][0] == 'down':
+                    _index = self.line_dict[line_id][2]
+                    _list = self.db[_index]
+                    _end = self.get_minimum(_list)
+                    self.line_coords[line_id][0].append(_index)
+                    self.line_coords[line_id][1].append(_end)
+                #print("{0:>5} {1:>10}    {2:<25}  {3:<20}".format(item,line_id,self.line_dict[line_id],self.line_coords[line_id]))    
+
+
+            # Step2: Create a new entry in the dict with direction and start point
+            if act_key != last_key and not line_in_progress:
+                line_in_progress = True
+                line_id += 1
+                
+                # Step2.1: Start is the end point of the last line!
+                self.line_dict[line_id] = [self.final_direction[item], item-1, 0]  
+
+
+                # Step2.2: Also Create a item in the line_coords dict for creating a graph
+                # If direction == 'up': Start is the minimum of the index and the end the maximum
+                # If direction == 'down': Start is the maximum of the index and the end the minimum
+                if self.line_dict[line_id][0] == 'up':
+                    _index = self.line_dict[line_id][1]
+                    _list = self.db[_index]
+                    _start = self.get_minimum(_list)
+                    self.line_coords[line_id] = [[_index], [_start]]
+                    
+                elif self.line_dict[line_id][0] == 'down':
+                    _index = self.line_dict[line_id][1]
+                    _list = self.db[_index]
+                    _start = self.get_maximum(_list)
+                    self.line_coords[line_id] = [[_index], [_start]]
+
+
+            # Step3: last_key = act_key and start next cycle
+            last_key = act_key
+
+    
+        #print('_______self.line_dict:',len(self.line_dict), self.line_dict)
+        
 ##################################################################################################################################
 ##################################################################################################################################
 ##################################################################################################################################        
