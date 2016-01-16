@@ -40,7 +40,7 @@ class Database():
 
 
         x = 0
-        with open('test2.csv','r') as csvfile:
+        with open('test.csv','r') as csvfile:
             source_data = csv.reader(csvfile, delimiter=str(','))
             for line in source_data:
                 #dates.append(mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()))
@@ -91,6 +91,7 @@ class Test():
         
         self.main_direction = []
         self.sub_direction = []
+        self.final_direction = []
         self.item_marker = []
 
         self.list_aussenstab = []
@@ -102,25 +103,57 @@ class Test():
             
             self.main_direction.append([])
             self.sub_direction.append([])
+            self.final_direction.append([])
             self.item_marker.append([[],[],[]])
 
         print('Database entries:', len(self.db))
-        print('##############################################################')
-        self.test_mainloop()
-        #for index in range(len(self.db)):
-        #    print("==>{0:>5} {1:<15} {2:<15} {3:<20}".format("Index","main_direction","sub_direction","item_marker"))
-        #print('##############################################################')
-
-        self.ausgabe()
+        print('########################################################################################################################')
+        self.main_dir_classification()
         self.sub_dir_classification()
+        self.final_dir_classification()
+        self.create_innenstaebe()
+        self.create_test_lines()
+
+
+        
+        for item in range(len(self.db)):
+            print("{0:>5}  {1:20} {2:<15} {3:<15} {4:<40}".format(item,self.main_direction[item],self.sub_direction[item],self.final_direction[item],self.item_marker[item]))
+        print('########################################################################################################################')
         ###########################
         
-    def get_minimum(self, list_):
-        return min(list_)
+##################################################################################################################################
+##################################################################################################################################
+##################################################################################################################################
+    def main_dir_classification(self):
+        result = []
 
-    def get_maximum(self, list_):
-        return max(list_)
-      
+        # Step1: check direction, and classify items
+        for item in range(len(self.db)):
+            if item == 0:
+                    self.main_direction[item] = []
+                    self.sub_direction[item] = []
+                    self.item_marker[item] = [[],[],[]]
+            else:
+                #Step1.1 check if the list aussenstab already exists and check item for innenstab
+                if self.list_aussenstab:
+                    self.check_list_aussenstab(item)
+                    
+                #Step1.2 mark the relevant items if true
+                # this will already be done in Step1.1 "check_list_aussenstab"
+
+                #Step1.3 check if Innenstab and if true attach item to list
+                result = self.check_direction(self.db[item-1], self.db[item])
+                result2 = self.check_innenstab(result)
+                
+                #Step1.4 mark the relevant items if true
+                if result2:
+                    self.mark_items(item-1, item)
+                    
+                #Step1.5 set main_direction
+                self.main_direction[item] = result
+                #print('==>',item, ' direction:',self.main_direction[item],' sub_direction:', self.sub_direction[item],' item_marker:', self.item_marker[item])
+
+   
     def check_direction(self, index1, index2):
         result = []
         
@@ -162,7 +195,6 @@ class Test():
         if item2 not in self.list_innenstab:    
             self.list_innenstab.insert(0, item2)
 
-
         _temp = str("Aussenstab")
         self.item_marker[item1][0] = _temp
 
@@ -202,100 +234,16 @@ class Test():
 
         #print('self.list_aussenstab',self.list_aussenstab)
 
-    def test_mainloop(self):
-        result = []
 
-        # Step1: check direction, and classify items
-        for item in range(len(self.db)):
-            if item == 0:
-                    self.main_direction[item] = []
-                    self.sub_direction[item] = []
-                    self.item_marker[item] = [[],[],[]]
-            else:
-                #Step1.1 check if the list aussenstab already exists and check item for innenstab
-                if self.list_aussenstab:
-                    self.check_list_aussenstab(item)
-                    
-                #Step1.2 mark the relevant items if true
+    def get_minimum(self, list_):
+        return min(list_)
 
+    def get_maximum(self, list_):
+        return max(list_)
 
-                #Step1.3 check if Innenstab and if true attach item to list
-                result = self.check_direction(self.db[item-1], self.db[item])
-                result2 = self.check_innenstab(result)
-                
-                #Step1.4 mark the relevant items if true
-                if result2:
-                    self.mark_items(item-1, item)
-                """    
-                else:   # fix for wrong markings bei verschachtelten innenstaeben 
-                    _counter = self.item_marker[item][2]
-                    if _counter:
-                        #print('________________________try to apply fix for _counter:', self.item_marker[item])
-                        self.item_marker[item][1][0] = self.item_marker[item-1][1][0]    # get string from Innenstab before this one
-                        #print('________________________fix executed:', self.item_marker[item])
-                """
-
-                self.main_direction[item] = result
-                #print('==>',item, ' direction:',self.main_direction[item],' sub_direction:', self.sub_direction[item],' item_marker:', self.item_marker[item])
-
-
-    def ausgabe(self):
-        self.aussenstaebe_up_lim = {}
-        self.aussenstaebe_low_lim = {}
-
-        for item in range(len(self.item_marker)):
-            if self.item_marker[item][0]:
-                self.aussenstaebe_up_lim[item] = [[],[]]
-                self.aussenstaebe_low_lim[item] = [[],[]]
-
-                _temp2 = self.get_maximum(self.db[item])
-                self.aussenstaebe_up_lim[item][0].append(item)
-                self.aussenstaebe_up_lim[item][1].append(_temp2)
-
-                _temp2 = self.get_minimum(self.db[item])
-                self.aussenstaebe_low_lim[item][0].append(item)
-                self.aussenstaebe_low_lim[item][1].append(_temp2)
-                                
-                #print(item)
-                #print('aussenstaebe_up_lim', self.aussenstaebe_up_lim[item], self.get_maximum(self.db[item]))
-                #print('aussenstaebe_low_lim',self.aussenstaebe_low_lim[item],self.get_minimum(self.db[item]))
-                
-            try:
-                if self.item_marker[item][1][1]:
-                    _temp = self.item_marker[item][1][1]
-                    #print('______try Pfad: _temp',_temp, 'item', item)
-
-                    _temp2 = self.get_maximum(self.db[_temp])
-                    self.aussenstaebe_up_lim[_temp][0].append(item)
-                    self.aussenstaebe_up_lim[_temp][1].append(_temp2)
-                                
-                    _temp2 = self.get_minimum(self.db[_temp])
-                    self.aussenstaebe_low_lim[_temp][0].append(item)
-                    self.aussenstaebe_low_lim[_temp][1].append(_temp2)
-
-                #print(self.db[item])
-                #print('aussenstaebe_up_lim', self.aussenstaebe_up_lim[_temp], self.get_maximum(self.db[item]))
-                #print('aussenstaebe_low_lim',self.aussenstaebe_low_lim[_temp],self.get_minimum(self.db[item]))
-                
-            except IndexError:
-                pass
-            except:
-                (type, value, traceback) = sys.exc_info()
-                print("Unexpected error:")
-                print("Type: ", type)
-                print("Value: ", value)
-                print("traceback: ", traceback)
-                raise
-
-
-        #for item in self.aussenstaebe_up_lim:
-        #    print('aussenstaebe_up_lim:', item, self.aussenstaebe_up_lim[item])
-        #for item in self.aussenstaebe_low_lim:
-        #    print('aussenstaebe_low_lim:', item, self.aussenstaebe_low_lim[item])           
-        #print('aussenstaebe_up_lim:',self.aussenstaebe_up_lim)
-        #print('aussenstaebe_low_lim:',self.aussenstaebe_low_lim)
-
-
+##################################################################################################################################
+##################################################################################################################################
+##################################################################################################################################
     def sub_dir_classification(self):
         """
         # item_marker [ [0], [[1][0], [1][1]], [2] ]
@@ -317,7 +265,7 @@ class Test():
             self.subdir_testcase1(item)
             self.subdir_testcase2(item)
             self.subdir_testcase3(item)
-            #print("==>{0:>5}  {1:20} {2:<15} {3:<20}".format(item,self.main_direction[item],self.sub_direction[item],self.item_marker[item]))
+            #print("{0:>5}  {1:20} {2:<15} {3:<40}".format(item,self.main_direction[item],self.sub_direction[item],self.item_marker[item]))
             
         print('_______self.mark_4later:',len(self.mark_4later),self.mark_4later)
         print('_______try to fix self.mark_4later items in 2nd check loop:',len(self.mark_4later),self.mark_4later)
@@ -341,12 +289,13 @@ class Test():
 
 
         ###### summary
-        print("==>{0:>5}  {1:<20} {2:<15} {3:<20}".format("Index","main_direction","sub_direction","item_marker"))
+        #print("{0:>5}  {1:<20} {2:<15} {3:<15} {4:<40}".format("Index","main_direction","sub_direction","final_direction","item_marker"))
         for item in range(len(self.sub_direction)):
-            print("==>{0:>5}  {1:20} {2:<15} {3:<20}".format(item,self.main_direction[item],self.sub_direction[item],self.item_marker[item]))
+        #    print("{0:>5}  {1:20} {2:<15} {3:<15} {4:<40}".format(item,self.main_direction[item],self.sub_direction[item],self.final_direction[item],self.item_marker[item]))
             if not self.sub_direction[item]:
                 self.missing_dir.append(item)
         print('_______self.missing_dir:',len(self.missing_dir), self.missing_dir)
+        print("{0:>5}  {1:<20} {2:<15} {3:<15} {4:<40}".format("Index","main_direction","sub_direction","final_direction","item_marker"))
         ####################
 
     def subdir_testcase1(self, item):
@@ -389,7 +338,92 @@ class Test():
                 else:
                     print('==> no direction found for item:', item)
 
-        
+##################################################################################################################################
+##################################################################################################################################
+##################################################################################################################################        
+    def final_dir_classification(self):
+        """ Sets final direction according to main_direction and sub_direction entries """
+        for item in range(len(self.final_direction)):
+            if self.sub_direction[item]:
+                self.final_direction[item] = self.sub_direction[item]
+            else:
+                print('==> no direction found for item:', item)
+
+##################################################################################################################################
+##################################################################################################################################
+##################################################################################################################################
+    def create_innenstaebe(self):
+        self.aussenstaebe_up_lim = {}
+        self.aussenstaebe_low_lim = {}
+
+        for item in range(len(self.item_marker)):
+            if self.item_marker[item][0]:
+                self.aussenstaebe_up_lim[item] = [[],[]]
+                self.aussenstaebe_low_lim[item] = [[],[]]
+
+                _temp2 = self.get_maximum(self.db[item])
+                self.aussenstaebe_up_lim[item][0].append(item)
+                self.aussenstaebe_up_lim[item][1].append(_temp2)
+
+                _temp2 = self.get_minimum(self.db[item])
+                self.aussenstaebe_low_lim[item][0].append(item)
+                self.aussenstaebe_low_lim[item][1].append(_temp2)
+                                
+##                print(item)
+##                print('aussenstaebe_up_lim', self.aussenstaebe_up_lim[item], self.get_maximum(self.db[item]))
+##                print('aussenstaebe_low_lim',self.aussenstaebe_low_lim[item],self.get_minimum(self.db[item]))
+                
+            try:
+                if self.item_marker[item][1][1]:
+                    _temp = self.item_marker[item][1][1]
+                    #print('______try Pfad: _temp',_temp, 'item', item)
+
+                    _temp2 = self.get_maximum(self.db[_temp])
+                    self.aussenstaebe_up_lim[_temp][0].append(item)
+                    self.aussenstaebe_up_lim[_temp][1].append(_temp2)
+                                
+                    _temp2 = self.get_minimum(self.db[_temp])
+                    self.aussenstaebe_low_lim[_temp][0].append(item)
+                    self.aussenstaebe_low_lim[_temp][1].append(_temp2)
+
+##                print(self.db[item])
+##                print('aussenstaebe_up_lim', self.aussenstaebe_up_lim[_temp], self.get_maximum(self.db[item]))
+##                print('aussenstaebe_low_lim',self.aussenstaebe_low_lim[_temp],self.get_minimum(self.db[item]))
+                
+            except IndexError:
+                pass
+            except:
+                (type, value, traceback) = sys.exc_info()
+                print("Unexpected error:")
+                print("Type: ", type)
+                print("Value: ", value)
+                print("traceback: ", traceback)
+                raise
+
+
+##        for item in self.aussenstaebe_up_lim:
+##            print('aussenstaebe_up_lim:', item, self.aussenstaebe_up_lim[item])
+##        for item in self.aussenstaebe_low_lim:
+##            print('aussenstaebe_low_lim:', item, self.aussenstaebe_low_lim[item])           
+##        print('aussenstaebe_up_lim:',self.aussenstaebe_up_lim)
+##        print('aussenstaebe_low_lim:',self.aussenstaebe_low_lim)
+
+##################################################################################################################################
+##################################################################################################################################
+##################################################################################################################################        
+    def create_test_lines(self):
+        """ Creates lines in the graph """
+        pass
+
+
+
+
+
+
+            
+##################################################################################################################################
+##################################################################################################################################
+##################################################################################################################################        
 
 ############
 if __name__ == "__main__":
