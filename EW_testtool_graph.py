@@ -42,12 +42,20 @@ plot1 = candlestick_ohlc(ax1, test.raw_values, width=1.0, colorup='#77d879', col
 # plot a new line
 #plot2 = ax1.plot(data.dates, data.closes, label='3rd line', color='blue')
 #plot3 = ax1.plot([0,len(test.raw_values)-1], [0,2000], label='3rd line', color='blue')
+
+
+######>>>>>>>>>  plots der Innenstaebe 
 for item in test.aussenstaebe_up_lim:
     ax1.plot(test.aussenstaebe_up_lim[item][0],test.aussenstaebe_up_lim[item][1],color='blue')
 for item in test.aussenstaebe_low_lim:
     ax1.plot(test.aussenstaebe_low_lim[item][0],test.aussenstaebe_low_lim[item][1],color='blue')
 
+######>>>>>>>>>  plots der lines
+for item in test.line_coords:
+    ax1.plot(test.line_coords[item][0],test.line_coords[item][1],color='white')
 
+
+    
 
 for label in ax1.xaxis.get_ticklabels():
     label.set_rotation(90)
