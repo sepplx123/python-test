@@ -40,7 +40,7 @@ class Database():
 
 
         x = 0
-        with open('test.csv','r') as csvfile:
+        with open('test3.csv','r') as csvfile:
             source_data = csv.reader(csvfile, delimiter=str(','))
             for line in source_data:
                 #dates.append(mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()))
@@ -390,72 +390,103 @@ class Test():
 
         
     def subdir_testcase2(self, item, _loop_inidcator):       
-        """ main_direction has "up" and "down" available. So we can check main_direction of partners or mark4later """
+        """
+        main_direction has "up" and "down" available. So we can check main_direction of partners or mark4later
+
+        Soemtimes the bar with 2 entries "up" and "down" needs an extra vertikal line!
+        So final direction need 2 entries [start,stop]
+        if not stop: the bar is only 1 point on the line, else the bar is a separate line!!!
+        test2.csv ==> 1343-1353
+        """
         if _loop_inidcator:
             _index = _loop_inidcator
         else:
             _index = 1
             
         if len(self.main_direction[item]) == 2 and ("up" in self.main_direction[item] or "down" in self.main_direction[item]):
+
+            if (item+1) < (len(self.db)-1): # fix for last item in list (IndexError)
             
-            if ("down" in [element for element in self.sub_direction[item-1] if element]) and (
-                "down" in [element for element in self.sub_direction[item+1] if element]) and (
-                self.get_minimum(self.db[item+1]) < self.get_minimum(self.db[item])) :
-                self.sub_direction[item][_index] = str("up")
-                print('+++++++++++++++++++++Pfad1',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
-                
-            elif ("down" in [element for element in self.sub_direction[item-1] if element]) and (
-                "down" in [element for element in self.sub_direction[item+1] if element]) and (
-                self.get_minimum(self.db[item+1]) > self.get_minimum(self.db[item])) :
-                self.sub_direction[item][_index] = str("down")
-                print('+++++++++++++++++++++Pfad2',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
-                
-            elif ("up" in [element for element in self.sub_direction[item-1] if element]) and (
-                "up" in [element for element in self.sub_direction[item+1] if element]) and (
-                self.get_maximum(self.db[item+1]) > self.get_maximum(self.db[item])) :
-                self.sub_direction[item][_index] = str("down")
-                print('+++++++++++++++++++++Pfad3',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
-
-            elif ("up" in [element for element in self.sub_direction[item-1] if element]) and (
-                "up" in [element for element in self.sub_direction[item+1] if element]) and (
-                self.get_maximum(self.db[item+1]) < self.get_maximum(self.db[item])) :
-                self.sub_direction[item][_index] = str("up")
-                print('+++++++++++++++++++++Pfad4',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
-
-            elif ("down" in [element for element in self.sub_direction[item+1] if element]):
-                self.sub_direction[item][_index] = str("up")
-                print('+++++++++++++++++++++++++++',item, 'Pfad 5')
-
-                
-            elif "up" in [element for element in self.sub_direction[item+1] if element]:
-                self.sub_direction[item][_index] = str("down")
-
-            
-##            if self.bar_color[item-1] == "red" and self.bar_color[item+1] == "red": # if both the same color, this bar need to be switched
-##                self.sub_direction[item][_index] = str("up")
-##            elif self.bar_color[item-1] == "green" and self.bar_color[item+1] == "green": # if both the same color, this bar need to be switched
-##                self.sub_direction[item][_index] = str("down")
-##            elif self.bar_color[item-1] == "red":
-##                self.sub_direction[item][_index] = str("down") # if the colors are different, the bar should follow the path from the bar before
-##            elif self.bar_color[item-1] == "green":
-##                self.sub_direction[item][_index] = str("up")   # if the colors are different, the bar should follow the path from the bar before
+                if ("down" in [element for element in self.sub_direction[item-1] if element]) and (
+                    "down" in [element for element in self.sub_direction[item+1] if element]) and (
+                    self.get_minimum(self.db[item+1]) < self.get_minimum(self.db[item])) :
+                    self.sub_direction[item][_index] = str("up")
+                    #print('+++++++++++++++++++++Pfad1',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
                     
-            else:
-                if item not in self.mark_4later:
-                    self.mark_4later.append(item)
-                    print('===> mark_4later case detected:  index:', item, self.main_direction[item+1])
+                elif ("down" in [element for element in self.sub_direction[item-1] if element]) and (
+                    "down" in [element for element in self.sub_direction[item+1] if element]) and (
+                    self.get_minimum(self.db[item+1]) > self.get_minimum(self.db[item])) :
+                    self.sub_direction[item][_index] = str("down")
+                    #print('+++++++++++++++++++++Pfad2',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
+                    
+                elif ("up" in [element for element in self.sub_direction[item-1] if element]) and (
+                    "up" in [element for element in self.sub_direction[item+1] if element]) and (
+                    self.get_maximum(self.db[item+1]) > self.get_maximum(self.db[item])) :
+                    self.sub_direction[item][_index] = str("down")
+                    #print('+++++++++++++++++++++Pfad3',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
+
+                elif ("up" in [element for element in self.sub_direction[item-1] if element]) and (
+                    "up" in [element for element in self.sub_direction[item+1] if element]) and (
+                    self.get_maximum(self.db[item+1]) < self.get_maximum(self.db[item])) :
+                    self.sub_direction[item][_index] = str("up")
+                    #print('+++++++++++++++++++++Pfad4',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
+
+
+
+                elif ("up" in [element for element in self.sub_direction[item-1] if element]) and (
+                    self.get_maximum(self.db[item+1]) < self.get_maximum(self.db[item])) :
+                    self.sub_direction[item][_index] = str("up")
+                    #print('+++++++++++++++++++++Pfad5',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
+                elif ("down" in [element for element in self.sub_direction[item-1] if element]) and (
+                    self.get_minimum(self.db[item+1]) > self.get_minimum(self.db[item])) :
+                    self.sub_direction[item][_index] = str("down")
+                    #print('+++++++++++++++++++++Pfad6',item, self.get_minimum(self.db[item+1]), self.get_minimum(self.db[item]))
+
+
+
+                elif "down" in [element for element in self.sub_direction[item+1] if element] :
+                    self.sub_direction[item][_index] = str("up")
+                    #print('+++++++++++++++++++++++++++',item, 'Pfad 7')
+     
+                elif "up" in [element for element in self.sub_direction[item+1] if element] :
+                    self.sub_direction[item][_index] = str("down")
+                    #print('+++++++++++++++++++++++++++',item, 'Pfad 8')
+
                 else:
-                    print('==> no direction found for item:', item)
+                    if item not in self.mark_4later:
+                        self.mark_4later.append(item)
+                        print('===> mark_4later case detected:  index:', item, self.main_direction[item])
+                    else:
+                        print('==> no direction found for item:', item)
+
+            else:
+                #### new
+                if "down" in [element for element in self.sub_direction[item-1] if element] :
+                    self.sub_direction[item][_index] = str("down")
+                    #print('+++++++++++++++++++++++++++',item, 'Pfad 7')
+
+                elif "up" in [element for element in self.sub_direction[item-1] if element] :
+                    self.sub_direction[item][_index] = str("up")
+                    #print('+++++++++++++++++++++++++++',item, 'Pfad 8')
+                                 
+                else:
+                    if item not in self.mark_4later:
+                        self.mark_4later.append(item)
+                        print('===> mark_4later case detected:  index:', item, self.main_direction[item])
+                    else:
+                        print('==> no direction found for item:', item)
 
 
     def subdir_testcase3(self, item, _loop_inidcator):
-        """ main_direction not available. So we can check sub_direction of partners or mark4later """
+        """ main_direction not available. So we can check sub_direction of partners or mark4later
+            Or Main direction is same_max or same_min.
+        """
         if _loop_inidcator:
             _index = _loop_inidcator
         else:
             _index = 2
         
-        if not self.main_direction[item]:
+        if not self.main_direction[item] or (len(self.main_direction[item]) == 1 and ("same_max" in self.main_direction[item] or "same_min" in self.main_direction[item])):
             
             if len(self.main_direction[item-1]) == 1 and "up" in self.main_direction[item-1]:
                 self.sub_direction[item][_index] = str("down")
@@ -464,36 +495,38 @@ class Test():
             elif "up" in [element for element in self.sub_direction[item-1] if element]:
                 self.sub_direction[item][_index] = str("down")
             elif "down" in [element for element in self.sub_direction[item-1] if element]:
-                self.sub_direction[item][_index] = str("up")   
-
-            elif ("up" in [element for element in self.sub_direction[item+1] if element]) and (self.get_maximum(self.db[item+1]) > self.get_maximum(self.db[item])):
-                self.sub_direction[item][_index] = str("up")
-            elif ("up" in [element for element in self.sub_direction[item+1] if element]) and (self.get_maximum(self.db[item+1]) < self.get_maximum(self.db[item])):
-                self.sub_direction[item][_index] = str("down")
-                
-            elif ("down" in [element for element in self.sub_direction[item+1] if element]) and (self.get_minimum(self.db[item+1]) < self.get_minimum(self.db[item])):
-                self.sub_direction[item][_index] = str("down")
-            elif ("down" in [element for element in self.sub_direction[item+1] if element]) and (self.get_minimum(self.db[item+1]) > self.get_minimum(self.db[item])):
-                self.sub_direction[item][_index] = str("up")
-
-            
-##
-##            elif len(self.main_direction[item+1]) == 1 and "up" in self.main_direction[item+1]:
-##                self.sub_direction[item][_index] = str("down")
-##            elif len(self.main_direction[item+1]) == 1 and "down" in self.main_direction[item+1]:
-##                self.sub_direction[item][_index] = str("up")
-##            elif "up" in [element for element in self.sub_direction[item+1] if element]:
-##                self.sub_direction[item][_index] = str("down")
-##            elif "down" in [element for element in self.sub_direction[item+1] if element]:
-##                self.sub_direction[item][_index] = str("up")
-
+                self.sub_direction[item][_index] = str("up")          
 
             else:
                 if item not in self.mark_4later:
                     self.mark_4later.append(item)
-                    print('===> mark_4later case detected:  index:', item, self.sub_direction[item+1])
+                    print('===> mark_4later case detected:  index:', item, self.sub_direction[item])
                 else:
-                    print('==> no direction found for item:', item)
+                    print('==> no direction found for item:', item)                
+                
+            if (item+1) < (len(self.db)-1): # fix for last item in list (IndexError)
+
+                if not [element for element in self.sub_direction[item-1] if element] and (self.get_maximum(self.db[item+1]) > self.get_maximum(self.db[item])) and ("up" in [element for element in self.sub_direction[item+1] if element]):
+                    self.sub_direction[item][_index] = str("down")
+                elif not [element for element in self.sub_direction[item-1] if element] and (self.get_minimum(self.db[item+1]) < self.get_maximum(self.db[item])) and ("down" in [element for element in self.sub_direction[item+1] if element]):
+                    self.sub_direction[item][_index] = str("up")
+                    
+                elif ("up" in [element for element in self.sub_direction[item+1] if element]) and (self.get_maximum(self.db[item+1]) > self.get_maximum(self.db[item])):
+                    self.sub_direction[item][_index] = str("up")
+                elif ("up" in [element for element in self.sub_direction[item+1] if element]) and (self.get_maximum(self.db[item+1]) < self.get_maximum(self.db[item])):
+                    self.sub_direction[item][_index] = str("down")
+                    
+                elif ("down" in [element for element in self.sub_direction[item+1] if element]) and (self.get_minimum(self.db[item+1]) < self.get_minimum(self.db[item])):
+                    self.sub_direction[item][_index] = str("down")
+                elif ("down" in [element for element in self.sub_direction[item+1] if element]) and (self.get_minimum(self.db[item+1]) > self.get_minimum(self.db[item])):
+                    self.sub_direction[item][_index] = str("up")         
+
+                else:
+                    if item not in self.mark_4later:
+                        self.mark_4later.append(item)
+                        print('===> mark_4later case detected:  index:', item, self.sub_direction[item])
+                    else:
+                        print('==> no direction found for item:', item)
 
 ##################################################################################################################################
 ##################################################################################################################################
