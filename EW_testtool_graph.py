@@ -46,23 +46,22 @@ plot1 = candlestick_ohlc(ax1, test.raw_values, width=1.0, colorup='#77d879', col
 
 ######>>>>>>>>>  plots der Innenstaebe 
 for item in test.aussenstaebe_up_lim:
-    ax1.plot(test.aussenstaebe_up_lim[item][0],test.aussenstaebe_up_lim[item][1],color='white')
+    ax1.plot(test.aussenstaebe_up_lim[item][0],test.aussenstaebe_up_lim[item][1],color='blue')
 for item in test.aussenstaebe_low_lim:
-    ax1.plot(test.aussenstaebe_low_lim[item][0],test.aussenstaebe_low_lim[item][1],color='white')
+    ax1.plot(test.aussenstaebe_low_lim[item][0],test.aussenstaebe_low_lim[item][1],color='blue')
 
 ######>>>>>>>>>  plots der lines
 #for item in test.line_coords:
 #    ax1.plot(test.line_coords[item][0],test.line_coords[item][1],color='white')
 
 ######>>>>>>>>>  plots der detail_lines
-for item in test.detail_lines:
-    ax1.plot(test.detail_lines[item][0],test.detail_lines[item][1],color='yellow', linewidth=2.5)
+#for item in test.detail_lines:
+#    ax1.plot(test.detail_lines[item][0],test.detail_lines[item][1],color='yellow', linewidth=2.5)
     
-
 
 ######>>>>>>>>>  plots der simple_l1
 for item in test.simple_l1:
-    ax1.plot(test.simple_l1[item][2],test.simple_l1[item][3],color='blue')
+    ax1.plot(test.simple_l1[item][2],test.simple_l1[item][3],color='white')
 
 
 
