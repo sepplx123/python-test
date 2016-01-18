@@ -40,7 +40,7 @@ class Database():
 
 
         x = 0
-        with open('test.csv','r') as csvfile:
+        with open('test2.csv','r') as csvfile:
             source_data = csv.reader(csvfile, delimiter=str(','))
             for line in source_data:
                 #dates.append(mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()))
@@ -874,6 +874,30 @@ class Test():
                 self.line_last_item = item
                 print('Step1_6:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
                 return True 
+
+            # if direction == "up" ==> stop when color[item] == "red" || color change
+            elif self.line_in_progress and self.simple_l1[self.line_id][1] == "up" and (
+                self.get_maximum(self.db[item]) > self.get_maximum(self.db[item-1])) and (
+                self.bar_color[item] == "red") and (self.simple_l1[self.line_id][2][0] < item):
+                
+                self.line_in_progress = False
+                self.simple_l1[self.line_id][2].append(item)
+                self.simple_l1[self.line_id][3].append(self.get_maximum(self.db[item]))
+                self.line_last_item = item
+                print('Step1_7:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True
+            
+            # if direction == "down" ==> stop when color[item] == "green" || color change
+            elif self.line_in_progress and self.simple_l1[self.line_id][1] == "down" and (
+                self.get_minimum(self.db[item]) < self.get_minimum(self.db[item-1])) and (
+                self.bar_color[item] == "green") and (self.simple_l1[self.line_id][2][0] < item):
+                
+                self.line_in_progress = False
+                self.simple_l1[self.line_id][2].append(item)
+                self.simple_l1[self.line_id][3].append(self.get_minimum(self.db[item]))
+                self.line_last_item = item
+                print('Step1_8:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True 
     
             else:
 
@@ -928,7 +952,7 @@ class Test():
         if item != 0 and item != (len(self.db)-1):
 
             if self.line_in_progress and self.simple_l1[self.line_id][1] == "up" and (
-                self.get_maximum(self.db[item+1]) < self.get_maximum(self.db[item])) and not self.bar_color[item] == "red":
+                self.get_maximum(self.db[item+1]) < self.get_maximum(self.db[item])) and self.bar_color[item] == "green":
                     self.line_in_progress = False
                     self.simple_l1[self.line_id][2].append(item)
                     self.simple_l1[self.line_id][3].append(self.get_maximum(self.db[item]))
@@ -937,16 +961,40 @@ class Test():
                     return True
             
             elif self.line_in_progress and self.simple_l1[self.line_id][1] == "down" and (
-                self.get_minimum(self.db[item+1]) > self.get_minimum(self.db[item])) and not self.bar_color[item] == "green":
+                self.get_minimum(self.db[item+1]) > self.get_minimum(self.db[item])) and self.bar_color[item] == "red":
                     self.line_in_progress = False
                     self.simple_l1[self.line_id][2].append(item)
                     self.simple_l1[self.line_id][3].append(self.get_minimum(self.db[item]))
                     self.line_last_item = item
                     print('Step3_2:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
                     return True
+
+###################################################
+            # need to be checked
+            elif self.line_in_progress and self.simple_l1[self.line_id][1] == "down" and (
+                self.get_maximum(self.db[item+1]) > self.get_maximum(self.db[item])) and (
+                    self.bar_color[item+1] == "red" and self.bar_color[item] == "red"):
+                    self.line_in_progress = False
+                    self.simple_l1[self.line_id][2].append(item)
+                    self.simple_l1[self.line_id][3].append(self.get_minimum(self.db[item]))
+                    self.line_last_item = item
+                    print('Step3_3:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                    return True            
+
+            elif self.line_in_progress and self.simple_l1[self.line_id][1] == "up" and (
+                self.get_minimum(self.db[item+1]) < self.get_minimum(self.db[item])) and (
+                    self.bar_color[item+1] == "green" and self.bar_color[item] == "green"):
+                    self.line_in_progress = False
+                    self.simple_l1[self.line_id][2].append(item)
+                    self.simple_l1[self.line_id][3].append(self.get_maximum(self.db[item]))
+                    self.line_last_item = item
+                    print('Step3_4:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                    return True
+            # need to be checked
+###################################################               
                 
             else:
-                print('Step3_3:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                print('Step3_5:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
                 return False
                 
 
