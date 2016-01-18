@@ -40,7 +40,7 @@ class Database():
 
 
         x = 0
-        with open('test3.csv','r') as csvfile:
+        with open('test.csv','r') as csvfile:
             source_data = csv.reader(csvfile, delimiter=str(','))
             for line in source_data:
                 #dates.append(mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()))
@@ -98,6 +98,7 @@ class Test():
         self.create_innenstaebe()
         self.create_test_lines()
 
+        self.detail_view()
 
         print('########################################################################################################################')
         print("{0:>5}  {1:<20} {2:<25} {3:<10} {4:<10} {5:<40}".format("Index","main_dir","sub_dir","final_dir","bar_color","item_marker"))
@@ -455,7 +456,7 @@ class Test():
                 else:
                     if item not in self.mark_4later:
                         self.mark_4later.append(item)
-                        print('===> mark_4later case detected:  index:', item, self.main_direction[item])
+                        #print('===> mark_4later case detected:  index:', item, self.main_direction[item])
                     else:
                         print('==> no direction found for item:', item)
 
@@ -472,7 +473,7 @@ class Test():
                 else:
                     if item not in self.mark_4later:
                         self.mark_4later.append(item)
-                        print('===> mark_4later case detected:  index:', item, self.main_direction[item])
+                        #print('===> mark_4later case detected:  index:', item, self.main_direction[item])
                     else:
                         print('==> no direction found for item:', item)
 
@@ -500,7 +501,7 @@ class Test():
             else:
                 if item not in self.mark_4later:
                     self.mark_4later.append(item)
-                    print('===> mark_4later case detected:  index:', item, self.sub_direction[item])
+                    #print('===> mark_4later case detected:  index:', item, self.sub_direction[item])
                 else:
                     print('==> no direction found for item:', item)                
                 
@@ -524,7 +525,7 @@ class Test():
                 else:
                     if item not in self.mark_4later:
                         self.mark_4later.append(item)
-                        print('===> mark_4later case detected:  index:', item, self.sub_direction[item])
+                        #print('===> mark_4later case detected:  index:', item, self.sub_direction[item])
                     else:
                         print('==> no direction found for item:', item)
 
@@ -690,7 +691,322 @@ class Test():
 
     
         #print('_______self.line_dict:',len(self.line_dict), self.line_dict)
+##################################################################################################################################
+##################################################################################################################################
+##################################################################################################################################
+    def detail_view(self):
+        """
+        self.db ==> O H L C
+        """
+        self.detail_marker = {}     # ["item": start, end]]
+        self.detail_lines = {}      # ["_line_id": [x],[y]]
+        self.simple_l1 = {}         # ["_line_id": [x],[y]]
+    
+
+        self.detail_step1()
+        self.create_detail_lines()
+        self.detail_simplifiy_level_1()
+
+    def detail_step1(self):
+        for item in range(len(self.db)):
+            if self.bar_color[item] == "green":
+                self.detail_marker[item] = str("down"), str("up")    #self.get_minimum(self.db[item]), self.get_macimum(self.db[item])
+            elif self.bar_color[item] == "red":
+                self.detail_marker[item] = str("up"), str("down")
+            else:
+                print('=======>>> Error color_bar for item:', item)
+
+            #print(item, self.bar_color[item], self.detail_marker[item])
+
+
+
+    def create_detail_lines(self):
+        _line_id = 0
+
+        for item in range(len(self.detail_marker)):
+            _line_id += 1
+
+            if item == 0:
+                if self.bar_color[item] == "green":
+                    self.detail_lines[_line_id] = [[item,item], [self.get_minimum(self.db[item]),self.get_maximum(self.db[item])]]
+                else:
+                    self.detail_lines[_line_id] = [[item,item], [self.get_maximum(self.db[item]),self.get_minimum(self.db[item])]]
+                #print(item, self.detail_lines[_line_id], 'self.bar_color[item]',self.bar_color[item])
+            
+            else:
+                if self.bar_color[item-1] == "green" and self.bar_color[item] == "green":
+                    self.detail_lines[_line_id] = [[item-1,item], [self.get_maximum(self.db[item-1]),self.get_minimum(self.db[item])]]
+                elif self.bar_color[item-1] == "green" and self.bar_color[item] == "red":
+                    self.detail_lines[_line_id] = [[item-1,item], [self.get_maximum(self.db[item-1]),self.get_maximum(self.db[item])]]
+                if self.bar_color[item-1] == "red" and self.bar_color[item] == "green":
+                    self.detail_lines[_line_id] = [[item-1,item], [self.get_minimum(self.db[item-1]),self.get_minimum(self.db[item])]]
+                elif self.bar_color[item-1] == "red" and self.bar_color[item] == "red":
+                    self.detail_lines[_line_id] = [[item-1,item], [self.get_minimum(self.db[item-1]),self.get_maximum(self.db[item])]]
+                #print(item, self.detail_lines[_line_id],'self.bar_color[item-1]',self.bar_color[item-1], 'self.bar_color[item]',self.bar_color[item])
+            
+                _line_id += 1
+                if self.bar_color[item] == "green":
+                    self.detail_lines[_line_id] = [[item,item], [self.get_minimum(self.db[item]),self.get_maximum(self.db[item])]]
+                else:
+                    self.detail_lines[_line_id] = [[item,item], [self.get_maximum(self.db[item]),self.get_minimum(self.db[item])]]
+                #print(item, self.detail_lines[_line_id], 'self.bar_color[item]',self.bar_color[item])
+                
+        #for item in self.detail_lines:
+        #    print(item, self.detail_lines[item])
+
+
+    def detail_simplifiy_level_1(self):
+        """ self.simple_l1 = [0, 1 , 2]
+        0 = color of the 1st bar
+        1 = direction of the line
+        2 = x points [start,end]
+        3 = y points [start,end]
+
+        Step1: Close old line at current item
+        Step2: Open new line at current item
+        Step3: if necessary close line at current item
+        Step4: If necessary open new line at current item
+        Step5: Fix for last item
+        """
+        self.line_id = 0
+        self.line_in_progress = False
+        self.line_last_item = 0
         
+        for item in range(len(self.db)):
+            print('START')
+            # Step1 : check if self.line_in_progress and the end point of the line is reached so the line can be closed
+            _temp = self.detail_simplifiy_level_1_step1(item)
+
+
+            # Step2 : Create a new entry with the start point of the line
+            if _temp or item == 0:
+                _temp = self.detail_simplifiy_level_1_step2(item)
+
+            
+            # Step3 : If necessary close line at current item
+            if _temp:
+                _temp = self.detail_simplifiy_level_1_step3(item)
+
+
+            # Step4 : If necessary open new line at current item
+            if _temp:
+                _temp = self.detail_simplifiy_level_1_step4(item)
+            
+
+            # Step5 : Fix for the last item
+            if item == (len(self.db)-1):
+                self.detail_simplifiy_level_1_close_last_item(item)
+
+
+        for item in self.simple_l1:
+            print("{0:>5}  {1:10} {2:<10} {3:<10} {4:<10}".format(item, self.simple_l1[item][0],self.simple_l1[item][1],self.simple_l1[item][2],self.simple_l1[item][3]))
+
+
+###################################
+    def detail_simplifiy_level_1_step1(self,item):
+        """ Step1 : check if self.line_in_progress and the end point of the line is reached so the line can be closed """
+        if item != 0 and item != (len(self.db)-1):
+            
+            # if direction == "up" ==> Find the maximum of the line
+            if self.line_in_progress and self.simple_l1[self.line_id][1] == "up" and (
+                self.get_maximum(self.db[item+1]) < self.get_maximum(self.db[item])):
+                
+                self.line_in_progress = False
+                self.simple_l1[self.line_id][2].append(item)
+                self.simple_l1[self.line_id][3].append(self.get_maximum(self.db[item]))
+                self.line_last_item = item
+                print('Step1_1:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True
+            # if direction == "down" ==> Find the minimum of the line
+            elif self.line_in_progress and self.simple_l1[self.line_id][1] == "down" and (
+                self.get_minimum(self.db[item+1]) > self.get_minimum(self.db[item])):
+                
+                self.line_in_progress = False
+                self.simple_l1[self.line_id][2].append(item)
+                self.simple_l1[self.line_id][3].append(self.get_minimum(self.db[item]))
+                self.line_last_item = item
+                print('Step1_2:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True
+
+
+            # if direction == "up" ==> stop when this bar has a lower minimum then the one before
+            elif self.line_in_progress and self.simple_l1[self.line_id][1] == "up" and (
+                self.get_minimum(self.db[item]) < self.get_minimum(self.db[item-1])):
+                
+                self.line_in_progress = False
+                self.simple_l1[self.line_id][2].append(item)
+                self.simple_l1[self.line_id][3].append(self.get_maximum(self.db[item]))
+                self.line_last_item = item
+                print('Step1_3:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True                                          
+            # if direction == "down" ==> stop when this bar has a higher maximum then the one before
+            elif self.line_in_progress and self.simple_l1[self.line_id][1] == "down" and (
+                self.get_maximum(self.db[item]) > self.get_maximum(self.db[item-1])):
+                
+                self.line_in_progress = False
+                self.simple_l1[self.line_id][2].append(item)
+                self.simple_l1[self.line_id][3].append(self.get_minimum(self.db[item]))
+                self.line_last_item = item
+                print('Step1_4:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True  
+
+
+            # if direction == "up" ==> stop when this bar has a higher minimum than item+1 and color[item+1] == "green"
+            elif self.line_in_progress and self.simple_l1[self.line_id][1] == "up" and (
+                self.get_minimum(self.db[item+1]) < self.get_minimum(self.db[item])) and (
+                self.bar_color[item+1] == "green"):
+                
+                self.line_in_progress = False
+                self.simple_l1[self.line_id][2].append(item)
+                self.simple_l1[self.line_id][3].append(self.get_maximum(self.db[item]))
+                self.line_last_item = item
+                print('Step1_6:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True 
+
+            # if direction == "down" ==> stop when this bar has a lower maximum than item+1 and color[item+1] == "red"
+            elif self.line_in_progress and self.simple_l1[self.line_id][1] == "down" and (
+                self.get_maximum(self.db[item+1]) > self.get_maximum(self.db[item])) and (
+                self.bar_color[item+1] == "red"):
+                
+                self.line_in_progress = False
+                self.simple_l1[self.line_id][2].append(item)
+                self.simple_l1[self.line_id][3].append(self.get_minimum(self.db[item]))
+                self.line_last_item = item
+                print('Step1_6:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True 
+    
+            else:
+
+                print('Step1_9:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return False
+
+        
+            
+    def detail_simplifiy_level_1_step2(self,item):
+        """ Step2: Open new line at current item """
+        if item == 0:
+
+            if not self.line_in_progress and self.bar_color[item] == "green":
+                self.line_id += 1
+                self.line_in_progress = True
+                self.simple_l1[self.line_id] = [str("green"),str("up"),[item],[self.get_minimum(self.db[item])]]
+                self.line_last_item = item
+                print('Step2_1:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True
+            
+            elif not self.line_in_progress and self.bar_color[item] == "red":
+                self.line_id += 1
+                self.line_in_progress = True
+                self.simple_l1[self.line_id] = [str("red"),str("down"),[item],[self.get_maximum(self.db[item])]]
+                self.line_last_item= item
+                print('Step2_2:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True
+             
+        else:
+            
+            if not self.line_in_progress and self.simple_l1[self.line_id][1] == "up":
+                self.line_id += 1
+                self.line_in_progress = True
+                self.simple_l1[self.line_id] = [self.bar_color[item],str("down"),[item],[self.get_maximum(self.db[item])]]
+                self.line_last_item = item
+                print('Step2_3:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True
+            
+            elif not self.line_in_progress and self.simple_l1[self.line_id][1] == "down":
+                self.line_id += 1
+                self.line_in_progress = True
+                self.simple_l1[self.line_id] = [self.bar_color[item],str("up"),[item],[self.get_minimum(self.db[item])]]
+                self.line_last_item = item
+                print('Step2_4:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True
+               
+        
+
+
+    def detail_simplifiy_level_1_step3(self,item):
+        """ Step3 : If necessary close line at current item """
+        if item != 0 and item != (len(self.db)-1):
+
+            if self.line_in_progress and self.simple_l1[self.line_id][1] == "up" and (
+                self.get_maximum(self.db[item+1]) < self.get_maximum(self.db[item])) and not self.bar_color[item] == "red":
+                    self.line_in_progress = False
+                    self.simple_l1[self.line_id][2].append(item)
+                    self.simple_l1[self.line_id][3].append(self.get_maximum(self.db[item]))
+                    self.line_last_item = item
+                    print('Step3_1:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                    return True
+            
+            elif self.line_in_progress and self.simple_l1[self.line_id][1] == "down" and (
+                self.get_minimum(self.db[item+1]) > self.get_minimum(self.db[item])) and not self.bar_color[item] == "green":
+                    self.line_in_progress = False
+                    self.simple_l1[self.line_id][2].append(item)
+                    self.simple_l1[self.line_id][3].append(self.get_minimum(self.db[item]))
+                    self.line_last_item = item
+                    print('Step3_2:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                    return True
+                
+            else:
+                print('Step3_3:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return False
+                
+
+        
+
+    def detail_simplifiy_level_1_step4(self,item):
+        """ # Step4 : If necessary open new line at current item """
+        if item == 0:
+            if not self.line_in_progress and self.bar_color[item] == "green":
+                self.line_id += 1
+                self.line_in_progress = True
+                self.simple_l1[self.line_id] = [str("green"),str("up"),[item],[self.get_minimum(self.db[item])]]
+                self.line_last_item = item
+                print('Step4_1:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True
+                
+            elif not self.line_in_progress and self.bar_color[item] == "red":
+                self.line_id += 1
+                self.line_in_progress = True
+                self.simple_l1[self.line_id] = [str("red"),str("down"),[item],[self.get_maximum(self.db[item])]]
+                self.line_last_item= item
+                print('Step4_2:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True
+             
+        else:
+            if not self.line_in_progress and self.simple_l1[self.line_id][1] == "up":
+                self.line_id += 1
+                self.line_in_progress = True
+                self.simple_l1[self.line_id] = [self.bar_color[item],str("down"),[item],[self.get_maximum(self.db[item])]]
+                self.line_last_item = item
+                print('Step4_3:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True
+            
+            elif not self.line_in_progress and self.simple_l1[self.line_id][1] == "down":
+                self.line_id += 1
+                self.line_in_progress = True
+                self.simple_l1[self.line_id] = [self.bar_color[item],str("up"),[item],[self.get_minimum(self.db[item])]]
+                self.line_last_item = item
+                print('Step4_4:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+                return True
+                
+                
+
+
+    def detail_simplifiy_level_1_close_last_item(self,item):
+        if self.line_in_progress and self.bar_color[item] and self.bar_color[item] == "green":        
+            self.line_in_progress = False
+            self.simple_l1[self.line_id][2].append(item)
+            self.simple_l1[self.line_id][3].append(self.get_maximum(self.db[item]))
+        elif self.line_in_progress and self.bar_color[item] and self.bar_color[item] == "red":
+            self.line_in_progress = False
+            self.simple_l1[self.line_id][2].append(item)
+            self.simple_l1[self.line_id][3].append(self.get_minimum(self.db[item]))    
+
+        print('last item:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+        
+
+
+
+
 ##################################################################################################################################
 ##################################################################################################################################
 ##################################################################################################################################        
