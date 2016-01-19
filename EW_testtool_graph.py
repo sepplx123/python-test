@@ -63,6 +63,9 @@ for item in test.aussenstaebe_low_lim:
 for item in test.simple_l1:
     ax1.plot(test.simple_l1[item][2],test.simple_l1[item][3],color='white')
 
+######>>>>>>>>>  plots der simple_l2
+for item in test.simple_l2:
+    ax1.plot(test.simple_l2[item][2],test.simple_l2[item][3],color='yellow', linewidth=2.0)
 
 
 for label in ax1.xaxis.get_ticklabels():
