@@ -38,18 +38,48 @@ class Database():
         self.closes = []
         self.volumes = []
 
+        
+##        x = 0
+##        with open('1111.csv','r') as csvfile:
+##            
+##            source_data = csv.reader(csvfile, delimiter=str(','))
+##            for line in source_data:
+##                #dates.append(mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()))
+##                self.dates.append(x)
+##                self.opens.append(float(line[1]))
+##                self.highs.append(float(line[2]))
+##                self.lows.append(float(line[3]))
+##                self.closes.append(float(line[4]))
+##                self.volumes.append(int(line[5]))
+##                
+##                _temp =  [ #mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()),
+##                             x,
+##                             float(line[1]),
+##                             float(line[2]),
+##                             float(line[3]),
+##                             float(line[4]),
+##                             int(line[5])
+##                        ]
+##                self.ohlc.append(_temp)
+##                self.stock_data.append(_temp)
+##                x += 1
 
-        x = 0
-        with open('test.csv','r') as csvfile:
-            source_data = csv.reader(csvfile, delimiter=str(','))
+
+        with open('3333.csv','r') as csvfile:
+            
+            csv_data = csv.reader(csvfile, delimiter=str(','))
+            source_data = list(csv_data)
+            x = len(source_data)-1
+
             for line in source_data:
                 #dates.append(mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()))
-                self.dates.append(x)
-                self.opens.append(float(line[1]))
-                self.highs.append(float(line[2]))
-                self.lows.append(float(line[3]))
-                self.closes.append(float(line[4]))
-                self.volumes.append(int(line[5]))
+
+                self.dates.insert(0,x)
+                self.opens.insert(0,float(line[1]))
+                self.highs.insert(0,float(line[2]))
+                self.lows.insert(0,float(line[3]))
+                self.closes.insert(0,float(line[4]))
+                self.volumes.insert(0,int(line[5]))
                 
                 _temp =  [ #mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()),
                              x,
@@ -59,9 +89,11 @@ class Database():
                              float(line[4]),
                              int(line[5])
                         ]
-                self.ohlc.append(_temp)
-                self.stock_data.append(_temp)
-                x += 1
+                self.ohlc.insert(0,_temp)
+                self.stock_data.insert(0,_temp)
+                x -= 1
+               
+
 
 ################################       
 ################################
@@ -99,8 +131,15 @@ class Test():
         self.create_test_lines()
 
         self.detail_view()
-        self.detail_simplifiy_level_1()
-        self.detail_simplifiy_level_2()
+        self.simple_line_l1 = self.detail_simplifiy_level_1()
+        self.simple_line_l2 = self.detail_simplifiy_level_2(self.simple_line_l1)
+        self.simple_line_l3 = self.detail_simplifiy_level_2(self.simple_line_l2)
+        self.simple_line_l4 = self.detail_simplifiy_level_2(self.simple_line_l3)
+        self.simple_line_l5 = self.detail_simplifiy_level_2(self.simple_line_l4)
+        self.simple_line_l6 = self.detail_simplifiy_level_2(self.simple_line_l5)
+        self.simple_line_l7 = self.detail_simplifiy_level_2(self.simple_line_l6)
+
+
 
 ##        print('########################################################################################################################')
 ##        print("{0:>5}  {1:<10} {2:<15} {3:<40}".format("Index","bar_color","main_dir","item_marker"))
@@ -622,6 +661,14 @@ class Test():
 
         self.parse_directions()
 
+##        print('________________create_test_lines:    self.line_dict')
+##        for item in self.line_dict:
+##            print(item, self.line_dict[item])
+##            
+##        print('________________create_test_lines:    self.line_coords')
+##        for item in self.line_coords:
+##            print(item, self.line_coords[item])
+##        print('#######################################################')
 
     def parse_directions(self):
         act_key = False
@@ -703,23 +750,27 @@ class Test():
         self.detail_marker = {}     # ["item": start, end]]
         self.detail_lines = {}      # ["_line_id": [x],[y]]
 
-        self.detail_step1()
+        # Step1:
+        self.set_detail_marker()
+        # Step2:
         self.create_detail_lines()
 
-        
-        
+##        print('________________detail_view:_______________')
+##        for item in self.detail_lines:
+##            print(item, self.detail_lines[item])        
+##        print('###########################################')
 
-    def detail_step1(self):
+
+    def set_detail_marker(self):
         for item in range(len(self.db)):
             if self.bar_color[item] == "green":
-                self.detail_marker[item] = str("down"), str("up")    #self.get_minimum(self.db[item]), self.get_macimum(self.db[item])
+                self.detail_marker[item] = str("down"), str("up")    #self.get_minimum(self.db[item]), self.get_maximum(self.db[item])
             elif self.bar_color[item] == "red":
                 self.detail_marker[item] = str("up"), str("down")
             else:
                 print('=======>>> Error color_bar for item:', item)
 
             #print(item, self.bar_color[item], self.detail_marker[item])
-
 
 
     def create_detail_lines(self):
@@ -810,6 +861,8 @@ class Test():
             print("{0:>5} {1:<45} {2:<10} {3:<20} {4:<20}".format(item, self.simple_l1[item][0],self.simple_l1[item][1],self.simple_l1[item][2],self.simple_l1[item][3]))
             pass
         print("########################################################################################################################")
+
+        return self.simple_l1
 
 ###################################
     def detail_simplifiy_level_1_step1(self,item):
@@ -1054,7 +1107,7 @@ class Test():
 ##################################################################################################################################
 ##################################################################################################################################
 ##################################################################################################################################
-    def detail_simplifiy_level_2(self):
+    def detail_simplifiy_level_2(self, input_line_dict):
         """
         try to simplify the lines and mark local maxima and minima
 
@@ -1070,11 +1123,12 @@ class Test():
         [2] = x points [start,end]
         [3] = y points [start,end]
 
-
+        input_line_dict = self.simple_l1
         combine every 2nd line of elf.simple_l1 and check if a new max or min are created
         
         """
-        self.simple_l2 = {}         # ["_line_id": "direction",[x],[y]]
+        self.simple_l2 = {}         # ["_line_id": [ [Included_L1_lines], "Direction", [X], [Y] ]
+        input_data = input_line_dict
 
         self.line_id = 0
         self.line_in_progress = False
@@ -1083,21 +1137,22 @@ class Test():
         self.l1_direction_even = str("")
 
 
-        self.detail_simplifiy_level_2_mainloop()
+        self.detail_simplifiy_level_2_mainloop(input_data)
 
         print("#######################################   detail_simplifiy_level_2   ###################################################")
         print("{0:>5} {1:<45} {2:<10} {3:<20} {4:<20}".format('Index', 'Included_L1_lines','Direction', '[X]','[Y]'))
         for item in self.simple_l2:
             print("{0:>5} {1:<45} {2:<10} {3:<20} {4:<20}".format(item, self.simple_l2[item][0], self.simple_l2[item][1],self.simple_l2[item][2],self.simple_l2[item][3]))
         print("########################################################################################################################")
-        
 
-    def detail_simplifiy_level_2_mainloop(self):
-        for item in self.simple_l1:
+        return self.simple_l2
+
+    def detail_simplifiy_level_2_mainloop(self,input_data):
+        for item in input_data:
             #print('START', item)
             # Step0: direction selection of simple_l1
             if item == 1:
-                self.l1_direction_odd = self.simple_l1[item][1]
+                self.l1_direction_odd = input_data[item][1]
 
                 if self.l1_direction_odd == "up": 
                     self.l1_direction_even = str("down")           
@@ -1106,19 +1161,19 @@ class Test():
                 #print('Odd direction:', self.l1_direction_odd,'   Even direction:', self.l1_direction_even)
 
             # Step1 :
-            self.detail_simplifiy_level_2_step1(item)
+            self.detail_simplifiy_level_2_step1(item,input_data)
             
             # Step2 :
-            self.detail_simplifiy_level_2_step2(item)
+            self.detail_simplifiy_level_2_step2(item,input_data)
             
             # Step3 : Fix for the last item
-            if item == len(self.simple_l1):
-                self.detail_simplifiy_level_2_close_last_item(item)
+            if item == len(input_data):
+                self.detail_simplifiy_level_2_close_last_item(item,input_data)
                 
 
 
 
-    def detail_simplifiy_level_2_step1(self,item):
+    def detail_simplifiy_level_2_step1(self,item,input_data):
         """
         Close an exisiting entry because the max or min was reached before
 
@@ -1132,21 +1187,21 @@ class Test():
         # Odd line numbers (1,3,5,7.....)
         if self.line_in_progress and item%2:                       
             if self.l1_direction_odd == self.simple_l2[self.line_id][1]: 
-                self.check_new_extremum(item)
+                self.check_new_extremum(item,input_data)
             else:
-                self.check_direction_change(item)
+                self.check_direction_change(item,input_data)
 
         # Even line numbers(2,4,6,8.....)
         if self.line_in_progress and not item%2:                   
             if self.l1_direction_even == self.simple_l2[self.line_id][1]: 
-                self.check_new_extremum(item)
+                self.check_new_extremum(item,input_data)
             else:
-                self.check_direction_change(item)
+                self.check_direction_change(item,input_data)
 
 
 
 
-    def check_new_extremum(self,item):
+    def check_new_extremum(self,item,input_data):
         """
         """
         # get the line_id of the last item from simple_l1. This info we need to get the end point of this line
@@ -1154,10 +1209,10 @@ class Test():
 
 
         if self.simple_l2[self.line_id][1] == "up":
-            if self.simple_l1[item][3][-1] < self.simple_l1[_temp][3][-1]:
+            if input_data[item][3][-1] < input_data[_temp][3][-1]:
                 
-                self.simple_l2[self.line_id][2].append(self.simple_l1[_temp][2][-1]) # X
-                self.simple_l2[self.line_id][3].append(self.simple_l1[_temp][3][-1]) # Y
+                self.simple_l2[self.line_id][2].append(input_data[_temp][2][-1]) # X
+                self.simple_l2[self.line_id][3].append(input_data[_temp][3][-1]) # Y
                 self.line_in_progress = False
                 #print('check_new_extremum_1:',item, self.line_id, self.line_in_progress, self.simple_l2[self.line_id])
             else:
@@ -1166,10 +1221,10 @@ class Test():
                 #print('check_new_extremum_2:',item, self.line_id, self.line_in_progress, self.simple_l2[self.line_id])
 
         elif self.simple_l2[self.line_id][1] == "down":
-            if self.simple_l1[item][3][-1] > self.simple_l1[_temp][3][-1]:
+            if input_data[item][3][-1] > input_data[_temp][3][-1]:
                 
-                self.simple_l2[self.line_id][2].append(self.simple_l1[_temp][2][-1]) # X
-                self.simple_l2[self.line_id][3].append(self.simple_l1[_temp][3][-1]) # Y
+                self.simple_l2[self.line_id][2].append(input_data[_temp][2][-1]) # X
+                self.simple_l2[self.line_id][3].append(input_data[_temp][3][-1]) # Y
                 self.line_in_progress = False
                 #print('check_new_extremum_1:',item, self.line_id, self.line_in_progress, self.simple_l2[self.line_id])
             else:
@@ -1177,17 +1232,17 @@ class Test():
                 self.simple_l2[self.line_id][0].append(item)
                 #print('check_new_extremum_2:',item, self.line_id, self.line_in_progress, self.simple_l2[self.line_id])    
 
-    def check_direction_change(self,item):
+    def check_direction_change(self,item,input_data):
         """
         """
 
         if self.simple_l2[self.line_id][1] == "up":
             
-            if self.simple_l1[item][3][-1] < self.simple_l2[self.line_id][3][0]:
+            if input_data[item][3][-1] < self.simple_l2[self.line_id][3][0]:
 
                 _temp = self.simple_l2[self.line_id][0][-1]
-                self.simple_l2[self.line_id][2].append(self.simple_l1[_temp][2][-1])
-                self.simple_l2[self.line_id][3].append(self.simple_l1[_temp][3][-1])
+                self.simple_l2[self.line_id][2].append(input_data[_temp][2][-1])
+                self.simple_l2[self.line_id][3].append(input_data[_temp][3][-1])
                 self.line_in_progress = False
                 #print('check_direction_change_1:',item, self.line_id, self.line_in_progress, self.simple_l2[self.line_id])
             else:
@@ -1196,11 +1251,11 @@ class Test():
 
         elif self.simple_l2[self.line_id][1] == "down":
             
-            if self.simple_l1[item][3][-1] > self.simple_l2[self.line_id][3][0]:
+            if input_data[item][3][-1] > self.simple_l2[self.line_id][3][0]:
 
                 _temp = self.simple_l2[self.line_id][0][-1]
-                self.simple_l2[self.line_id][2].append(self.simple_l1[_temp][2][-1])
-                self.simple_l2[self.line_id][3].append(self.simple_l1[_temp][3][-1])
+                self.simple_l2[self.line_id][2].append(input_data[_temp][2][-1])
+                self.simple_l2[self.line_id][3].append(input_data[_temp][3][-1])
                 self.line_in_progress = False
                 #print('check_direction_change_1:',item, self.line_id, self.line_in_progress, self.simple_l2[self.line_id])
             else:
@@ -1208,7 +1263,7 @@ class Test():
                 #print('check_direction_change_2:',item, self.line_id, self.line_in_progress, self.simple_l2[self.line_id])
 
 
-    def detail_simplifiy_level_2_step2(self,item):
+    def detail_simplifiy_level_2_step2(self,item,input_data):
         """
         open a new entry and create a line
         Only 1 active line!!! ano not 2
@@ -1235,9 +1290,9 @@ class Test():
                 _start = item
                 
                 self.simple_l2[self.line_id] = [ [_start],
-                                                self.simple_l1[_start][1],
-                                                [self.simple_l1[_start][2][0]],
-                                                [self.simple_l1[_start][3][0]],
+                                                input_data[_start][1],
+                                                [input_data[_start][2][0]],
+                                                [input_data[_start][3][0]],
                                                 ]
 
                 #print('Step2_0:',item, self.line_id, self.line_in_progress, self.simple_l2[self.line_id])
@@ -1251,15 +1306,15 @@ class Test():
                 _start = _last_included_line + 1
                 
                 self.simple_l2[self.line_id] = [ [_start],
-                                                self.simple_l1[_start][1],
-                                                [self.simple_l1[_start][2][0]],
-                                                [self.simple_l1[_start][3][0]],
+                                                input_data[_start][1],
+                                                [input_data[_start][2][0]],
+                                                [input_data[_start][3][0]],
                                                 ]
 
                 #print('Step2_1:',item, self.line_id, self.line_in_progress, self.simple_l2[self.line_id])
             
 
-    def detail_simplifiy_level_2_close_last_item(self,item):
+    def detail_simplifiy_level_2_close_last_item(self,item,input_data):
         """
         Need to draw the last line to the endpoint of the data
         Maybe 2 lines are missing!
@@ -1269,25 +1324,26 @@ class Test():
         _last_included_line = self.simple_l2[self.line_id][0][-1]
         
         # Step1: close the last line and set the endpoint
-        self.simple_l2[self.line_id][2].append(self.simple_l1[_last_included_line][2][-1]) # X
-        self.simple_l2[self.line_id][3].append(self.simple_l1[_last_included_line][3][-1]) # Y
+        self.simple_l2[self.line_id][2].append(input_data[_last_included_line][2][-1]) # X
+        self.simple_l2[self.line_id][3].append(input_data[_last_included_line][3][-1]) # Y
         self.line_in_progress = False
         #print('last_item_1:',item, self.line_id, self.line_in_progress, self.simple_l2[self.line_id],_last_included_line)
 
 
         # Step3: If not _last_included_line == last item of simple_l1: ==> make a new one for the last item from simple_l1
-        if not _last_included_line == len(self.simple_l1):
+        if not _last_included_line == len(input_data):
         
             self.line_id += 1
             _start = _last_included_line + 1
             
             self.simple_l2[self.line_id] = [ [_start],
-                                            self.simple_l1[_start][1],
-                                            self.simple_l1[_start][2],
-                                            self.simple_l1[_start][3],
+                                            input_data[_start][1],
+                                            input_data[_start][2],
+                                            input_data[_start][3],
                                             ]       
 
             #print('last_item_2:',item, self.line_id, self.line_in_progress, self.simple_l2[self.line_id])
+            
 
 ##################################################################################################################################
 ##################################################################################################################################
