@@ -38,61 +38,64 @@ class Database():
         self.closes = []
         self.volumes = []
 
-        
-##        x = 0
-##        with open('1111.csv','r') as csvfile:
-##            
-##            source_data = csv.reader(csvfile, delimiter=str(','))
-##            for line in source_data:
-##                #dates.append(mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()))
-##                self.dates.append(x)
-##                self.opens.append(float(line[1]))
-##                self.highs.append(float(line[2]))
-##                self.lows.append(float(line[3]))
-##                self.closes.append(float(line[4]))
-##                self.volumes.append(int(line[5]))
+        self.create_database()
+
+
+    def create_database(self):
+##            x = 0
+##            with open('1111.csv','r') as csvfile:
 ##                
-##                _temp =  [ #mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()),
-##                             x,
-##                             float(line[1]),
-##                             float(line[2]),
-##                             float(line[3]),
-##                             float(line[4]),
-##                             int(line[5])
-##                        ]
-##                self.ohlc.append(_temp)
-##                self.stock_data.append(_temp)
-##                x += 1
+##                source_data = csv.reader(csvfile, delimiter=str(','))
+##                for line in source_data:
+##                    #dates.append(mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()))
+##                    self.dates.append(x)
+##                    self.opens.append(float(line[1]))
+##                    self.highs.append(float(line[2]))
+##                    self.lows.append(float(line[3]))
+##                    self.closes.append(float(line[4]))
+##                    self.volumes.append(int(line[5]))
+##                    
+##                    _temp =  [ #mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()),
+##                                 x,
+##                                 float(line[1]),
+##                                 float(line[2]),
+##                                 float(line[3]),
+##                                 float(line[4]),
+##                                 int(line[5])
+##                            ]
+##                    self.ohlc.append(_temp)
+##                    self.stock_data.append(_temp)
+##                    x += 1
 
-
-        with open('3333.csv','r') as csvfile:
-            
-            csv_data = csv.reader(csvfile, delimiter=str(','))
-            source_data = list(csv_data)
-            x = len(source_data)-1
-
-            for line in source_data:
-                #dates.append(mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()))
-
-                self.dates.insert(0,x)
-                self.opens.insert(0,float(line[1]))
-                self.highs.insert(0,float(line[2]))
-                self.lows.insert(0,float(line[3]))
-                self.closes.insert(0,float(line[4]))
-                self.volumes.insert(0,int(line[5]))
+            with open('1111.csv','r') as csvfile:
                 
-                _temp =  [ #mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()),
-                             x,
-                             float(line[1]),
-                             float(line[2]),
-                             float(line[3]),
-                             float(line[4]),
-                             int(line[5])
-                        ]
-                self.ohlc.insert(0,_temp)
-                self.stock_data.insert(0,_temp)
-                x -= 1
+                csv_data = csv.reader(csvfile, delimiter=str(','))
+                source_data = list(csv_data)
+                x = len(source_data)-1
+
+                for line in source_data:
+                    #dates.append(mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()))
+
+                    self.dates.insert(0,x)
+                    self.opens.insert(0,float(line[1]))
+                    self.highs.insert(0,float(line[2]))
+                    self.lows.insert(0,float(line[3]))
+                    self.closes.insert(0,float(line[4]))
+                    self.volumes.insert(0,int(line[5]))
+                    
+                    _temp =  [ #mdates.date2num(dt.datetime.strptime(line[0],'%Y%m%d').date()),
+                                 x,
+                                 float(line[1]),
+                                 float(line[2]),
+                                 float(line[3]),
+                                 float(line[4]),
+                                 int(line[5])
+                            ]
+                    self.ohlc.insert(0,_temp)
+                    self.stock_data.insert(0,_temp)
+                    x -= 1
                
+
 
 
 ################################       
@@ -130,8 +133,8 @@ class Test():
         self.create_innenstaebe()
         self.create_test_lines()
 
-        self.detail_view()
-        self.simple_line_l1 = self.detail_simplifiy_level_1()
+        self.detail_view_lines = self.detail_view()
+        self.simple_line_l1 = self.detail_simplifiy_level_1(self.detail_view_lines)
         self.simple_line_l2 = self.detail_simplifiy_level_2(self.simple_line_l1)
         self.simple_line_l3 = self.detail_simplifiy_level_2(self.simple_line_l2)
         self.simple_line_l4 = self.detail_simplifiy_level_2(self.simple_line_l3)
@@ -281,6 +284,7 @@ class Test():
 ##################################################################################################################################
 ##################################################################################################################################
 ##################################################################################################################################
+    '''
     def sub_dir_classification(self):
         """
         # item_marker [ [0], [[1][0], [1][1]], [2] ]
@@ -582,7 +586,7 @@ class Test():
             else:
                 print('==> no direction found! Temporary use ==>  "up"  for item!', item)
                 self.final_direction[item] = str("up")  # !!!!!!!!!!!!!!!!
-
+    '''
 ##################################################################################################################################
 ##################################################################################################################################
 ##################################################################################################################################
@@ -670,6 +674,10 @@ class Test():
 ##            print(item, self.line_coords[item])
 ##        print('#######################################################')
 
+
+
+
+
     def parse_directions(self):
         act_key = False
         last_key = False
@@ -745,20 +753,27 @@ class Test():
 ##################################################################################################################################
     def detail_view(self):
         """
-        self.db ==> O H L C
+        self.db ==> Date O H L C
         """
-        self.detail_marker = {}     # ["item": start, end]]
-        self.detail_lines = {}      # ["_line_id": [x],[y]]
+        self.detail_marker = {}         # ["item": start, end]]
+        self.detail_lines = {}          # ["_line_id": "spare", "direction", [X], [Y]]
 
         # Step1:
         self.set_detail_marker()
         # Step2:
         self.create_detail_lines()
 
-##        print('________________detail_view:_______________')
-##        for item in self.detail_lines:
-##            print(item, self.detail_lines[item])        
-##        print('###########################################')
+        print("#############################################   detail_view:   #########################################################")
+        print("{0:>5} {1:<45} {2:<10} {3:<20} {4:<20}".format('Index', 'spare', 'Direction', '[X]','[Y]'))
+        for item in self.detail_lines:
+            print("{0:>5} {1:<45} {2:<10} {3:<20} {4:<20}".format(item, self.detail_lines[item][0], self.detail_lines[item][1],self.detail_lines[item][2],self.detail_lines[item][3]))
+        print("########################################################################################################################")
+
+
+        detail_simple_lines = self.create_detail_simple_lines()
+
+        return detail_simple_lines
+        
 
 
     def set_detail_marker(self):
@@ -776,42 +791,118 @@ class Test():
     def create_detail_lines(self):
         _line_id = 0
 
-        for item in range(len(self.detail_marker)):
+        for item in range(len(self.db)):
+            
             _line_id += 1
-
+            
             if item == 0:
                 if self.bar_color[item] == "green":
-                    self.detail_lines[_line_id] = [[item,item], [self.get_minimum(self.db[item]),self.get_maximum(self.db[item])]]
-                else:
-                    self.detail_lines[_line_id] = [[item,item], [self.get_maximum(self.db[item]),self.get_minimum(self.db[item])]]
+                    self.detail_lines[_line_id] = [str(""),str("up"),[item,item], [self.get_minimum(self.db[item]),self.get_maximum(self.db[item])]]
+                elif self.bar_color[item] == "red":
+                    self.detail_lines[_line_id] = [str(""),str("down"),[item,item], [self.get_maximum(self.db[item]),self.get_minimum(self.db[item])]]
                 #print(item, self.detail_lines[_line_id], 'self.bar_color[item]',self.bar_color[item])
             
-            else:
+            if item != 0:
+                # create a line from the last item to the actual item
                 if self.bar_color[item-1] == "green" and self.bar_color[item] == "green":
-                    self.detail_lines[_line_id] = [[item-1,item], [self.get_maximum(self.db[item-1]),self.get_minimum(self.db[item])]]
+                    if (self.get_maximum(self.db[item-1]) < self.get_minimum(self.db[item])):
+                        self.detail_lines[_line_id] = [str(""),str("up"),[item-1,item], [self.get_maximum(self.db[item-1]),self.get_minimum(self.db[item])]]
+                    else:
+                        self.detail_lines[_line_id] = [str(""),str("down"),[item-1,item], [self.get_maximum(self.db[item-1]),self.get_minimum(self.db[item])]]
+                    
                 elif self.bar_color[item-1] == "green" and self.bar_color[item] == "red":
-                    self.detail_lines[_line_id] = [[item-1,item], [self.get_maximum(self.db[item-1]),self.get_maximum(self.db[item])]]
-                if self.bar_color[item-1] == "red" and self.bar_color[item] == "green":
-                    self.detail_lines[_line_id] = [[item-1,item], [self.get_minimum(self.db[item-1]),self.get_minimum(self.db[item])]]
+                    if (self.get_maximum(self.db[item-1]) < self.get_maximum(self.db[item])):
+                        self.detail_lines[_line_id] = [str(""),str("up"),[item-1,item], [self.get_maximum(self.db[item-1]),self.get_maximum(self.db[item])]]
+                    else:
+                        self.detail_lines[_line_id] = [str(""),str("down"),[item-1,item], [self.get_maximum(self.db[item-1]),self.get_maximum(self.db[item])]]
+                    
+                elif self.bar_color[item-1] == "red" and self.bar_color[item] == "green":
+                    if (self.get_minimum(self.db[item-1]) < self.get_minimum(self.db[item])):
+                        self.detail_lines[_line_id] = [str(""),str("up"),[item-1,item], [self.get_minimum(self.db[item-1]),self.get_minimum(self.db[item])]]
+                    else:
+                        self.detail_lines[_line_id] = [str(""),str("down"),[item-1,item], [self.get_minimum(self.db[item-1]),self.get_minimum(self.db[item])]]
+                    
                 elif self.bar_color[item-1] == "red" and self.bar_color[item] == "red":
-                    self.detail_lines[_line_id] = [[item-1,item], [self.get_minimum(self.db[item-1]),self.get_maximum(self.db[item])]]
+                    if (self.get_minimum(self.db[item-1]) < self.get_maximum(self.db[item])):
+                        self.detail_lines[_line_id] = [str(""),str("up"),[item-1,item], [self.get_minimum(self.db[item-1]),self.get_maximum(self.db[item])]]
+                    else:
+                        self.detail_lines[_line_id] = [str(""),str("down"),[item-1,item], [self.get_minimum(self.db[item-1]),self.get_maximum(self.db[item])]]
+                        
                 #print(item, self.detail_lines[_line_id],'self.bar_color[item-1]',self.bar_color[item-1], 'self.bar_color[item]',self.bar_color[item])
-            
+
+                # create a vertikal line at the actual item
                 _line_id += 1
                 if self.bar_color[item] == "green":
-                    self.detail_lines[_line_id] = [[item,item], [self.get_minimum(self.db[item]),self.get_maximum(self.db[item])]]
-                else:
-                    self.detail_lines[_line_id] = [[item,item], [self.get_maximum(self.db[item]),self.get_minimum(self.db[item])]]
+                    self.detail_lines[_line_id] = [str(""),str("up"),[item,item], [self.get_minimum(self.db[item]),self.get_maximum(self.db[item])]]
+                elif self.bar_color[item] == "red":
+                    self.detail_lines[_line_id] = [str(""),str("down"),[item,item], [self.get_maximum(self.db[item]),self.get_minimum(self.db[item])]]
                 #print(item, self.detail_lines[_line_id], 'self.bar_color[item]',self.bar_color[item])
                 
-        #for item in self.detail_lines:
-        #    print(item, self.detail_lines[item])
+
+
+
+    def create_detail_simple_lines(self):
+        """
+        self.detail_lines = {}          # ["_line_id": "spare", "direction", [X], [Y]]
+        self.detail_simple_lines = {}   # ["_line_id": "spare", "direction", [X], [Y]]
+
+        0 = "spare"
+        1 = "Direction"
+        2 = [X]
+        3 = [Y]
+        """
+        self.detail_simple_lines = {}   # ["_line_id": "spare", "direction", [X], [Y]]
+        _line_id = 0
+        _line_in_progress = False
+        
+        for item in self.detail_lines:
+            
+            if item == 1:
+                _line_id += 1
+                _line_in_progress = True
+                self.detail_simple_lines[_line_id] = [ str(""), str(""), [self.detail_lines[item][2][0]], [self.detail_lines[item][3][0]] ]
+                #print(item, _line_id, self.detail_simple_lines[_line_id])
+                
+            if item != 1:
+                # if both lines are the same direction, we can combine these lines and maybe also the following until direction change
+                if self.detail_lines[item-1][1] == self.detail_lines[item][1]:
+                    continue
+                
+                # if both lines are different direction: close the [item-1] line and create a new line
+                else:
+                    self.detail_simple_lines[_line_id][1] = self.detail_lines[item-1][1]
+                    self.detail_simple_lines[_line_id][2].append(self.detail_lines[item-1][2][-1]) # X
+                    self.detail_simple_lines[_line_id][3].append(self.detail_lines[item-1][3][-1]) # Y
+                    #print(item, _line_id, self.detail_simple_lines[_line_id])
+
+                    _line_id += 1
+                    _line_in_progress = True
+                    self.detail_simple_lines[_line_id] = [ str(""), str(""), [self.detail_lines[item][2][0]], [self.detail_lines[item][3][0]] ]
+
+            # fix for last item: Close the last line
+            if item == len(self.detail_lines) and _line_in_progress:
+                _line_in_progress = False
+                self.detail_simple_lines[_line_id][1] = self.detail_lines[item][1]
+                self.detail_simple_lines[_line_id][2].append(self.detail_lines[item][2][-1]) # X
+                self.detail_simple_lines[_line_id][3].append(self.detail_lines[item][3][-1]) # Y
+                #print(item, _line_id, self.detail_simple_lines[_line_id])  
+
+        print("#########################################   detail_simple_lines   #####################################################")
+        print("{0:>5} {1:<45} {2:<10} {3:<20} {4:<20}".format('Index', 'spare', 'Direction', '[X]','[Y]'))
+        for item in self.detail_simple_lines:
+            print("{0:>5} {1:<45} {2:<10} {3:<20} {4:<20}".format(item, self.detail_simple_lines[item][0], self.detail_simple_lines[item][1],self.detail_simple_lines[item][2],self.detail_simple_lines[item][3]))
+        print("########################################################################################################################")
+
+
+        return self.detail_simple_lines                      
+
+        
 
 ##################################################################################################################################
 ##################################################################################################################################
 ##################################################################################################################################
         
-    def detail_simplifiy_level_1(self):
+    def detail_simplifiy_level_1(self,input_data):
         """ self.simple_l1 = [0, 1 , [2], [3]]
         0 = color of the 1st bar
         1 = direction of the line
@@ -855,12 +946,12 @@ class Test():
             if item == (len(self.db)-1):
                 self.detail_simplifiy_level_1_close_last_item(item)
 
-        print("#######################################   detail_simplifiy_level_1   ###################################################")
-        print("{0:>5} {1:<45} {2:<10} {3:<20} {4:<20}".format('Index', 'Color_1._bar', 'Direction', '[X]','[Y]'))
-        for item in self.simple_l1:
-            print("{0:>5} {1:<45} {2:<10} {3:<20} {4:<20}".format(item, self.simple_l1[item][0],self.simple_l1[item][1],self.simple_l1[item][2],self.simple_l1[item][3]))
-            pass
-        print("########################################################################################################################")
+##        print("#######################################   detail_simplifiy_level_1   ###################################################")
+##        print("{0:>5} {1:<45} {2:<10} {3:<20} {4:<20}".format('Index', 'Color_1._bar', 'Direction', '[X]','[Y]'))
+##        for item in self.simple_l1:
+##            print("{0:>5} {1:<45} {2:<10} {3:<20} {4:<20}".format(item, self.simple_l1[item][0],self.simple_l1[item][1],self.simple_l1[item][2],self.simple_l1[item][3]))
+##            pass
+##        print("########################################################################################################################")
 
         return self.simple_l1
 
@@ -1008,7 +1099,9 @@ class Test():
 
     def detail_simplifiy_level_1_step3(self,item):
         """ Step3 : If necessary close line at current item """
-        if item != 0 and item != (len(self.db)-1):
+        #if item != 0 and item != (len(self.db)-1):
+        
+        if item != (len(self.db)-1):
 
             if self.line_in_progress and self.simple_l1[self.line_id][1] == "up" and (
                 self.get_maximum(self.db[item+1]) < self.get_maximum(self.db[item])) and self.bar_color[item] == "green":
@@ -1057,39 +1150,22 @@ class Test():
 
     def detail_simplifiy_level_1_step4(self,item):
         """ # Step4 : If necessary open new line at current item """
-        if item == 0:
-            if not self.line_in_progress and self.bar_color[item] == "green":
-                self.line_id += 1
-                self.line_in_progress = True
-                self.simple_l1[self.line_id] = [str("green"),str("up"),[item],[self.get_minimum(self.db[item])]]
-                self.line_last_item = item
-                #print('Step4_1:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
-                return True
-                
-            elif not self.line_in_progress and self.bar_color[item] == "red":
-                self.line_id += 1
-                self.line_in_progress = True
-                self.simple_l1[self.line_id] = [str("red"),str("down"),[item],[self.get_maximum(self.db[item])]]
-                self.line_last_item= item
-                #print('Step4_2:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
-                return True
-             
-        else:
-            if not self.line_in_progress and self.simple_l1[self.line_id][1] == "up":
-                self.line_id += 1
-                self.line_in_progress = True
-                self.simple_l1[self.line_id] = [self.bar_color[item],str("down"),[item],[self.get_maximum(self.db[item])]]
-                self.line_last_item = item
-                #print('Step4_3:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
-                return True
-            
-            elif not self.line_in_progress and self.simple_l1[self.line_id][1] == "down":
-                self.line_id += 1
-                self.line_in_progress = True
-                self.simple_l1[self.line_id] = [self.bar_color[item],str("up"),[item],[self.get_minimum(self.db[item])]]
-                self.line_last_item = item
-                #print('Step4_4:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
-                return True
+
+        if not self.line_in_progress and self.simple_l1[self.line_id][1] == "up":
+            self.line_id += 1
+            self.line_in_progress = True
+            self.simple_l1[self.line_id] = [self.bar_color[item],str("down"),[item],[self.get_maximum(self.db[item])]]
+            self.line_last_item = item
+            #print('Step4_3:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+            return True
+        
+        elif not self.line_in_progress and self.simple_l1[self.line_id][1] == "down":
+            self.line_id += 1
+            self.line_in_progress = True
+            self.simple_l1[self.line_id] = [self.bar_color[item],str("up"),[item],[self.get_minimum(self.db[item])]]
+            self.line_last_item = item
+            #print('Step4_4:',item, self.line_id, self.line_in_progress, self.simple_l1[self.line_id])
+            return True
                 
 
     def detail_simplifiy_level_1_close_last_item(self,item):
