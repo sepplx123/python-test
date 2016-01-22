@@ -32,12 +32,15 @@ test = Test(data.stock_data)
 #       plots
 ################################       
 ################################
-################################
+################################    test.raw_values
 style.use('dark_background')
 
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
-plot1 = candlestick_ohlc(ax1, test.raw_values, width=1.0, colorup='#77d879', colordown='#db3f3f', alpha=1.0)
+#plot1 = candlestick_ohlc(ax1, data.ohlc, width=1.0, colorup='#77d879', colordown='#db3f3f', alpha=1.0)
+
+
+
 
 ########>>>>>>>>>  plots der Innenstaebe 
 ##for item in test.aussenstaebe_up_lim:
@@ -50,17 +53,6 @@ plot1 = candlestick_ohlc(ax1, test.raw_values, width=1.0, colorup='#77d879', col
 ##for item in test.line_coords:
 ##    ax1.plot(test.line_coords[item][0],test.line_coords[item][1],label='Bullshit',color='#7cfc00')
 
-
-def create_detail_lines(data_input, data_output):
-    for item in data_input:    
-            if item == 1:
-                data_output[0].append(data_input[item][0][0])
-                data_output[1].append(data_input[item][1][0])
-                data_output[0].append(data_input[item][0][1])
-                data_output[1].append(data_input[item][1][1])
-            else:
-                data_output[0].append(data_input[item][0][1])
-                data_output[1].append(data_input[item][1][1])
 
 def create_list_for_drawing(data_input, data_output):
     for item in data_input:
@@ -75,10 +67,15 @@ def create_list_for_drawing(data_input, data_output):
 
 
 ########>>>>>>>>>  plots der detail_lines
-##
 ##detail_lines = [[],[]]
-##create_detail_lines(test.detail_lines,detail_lines)
+##create_list_for_drawing(test.detail_lines,detail_lines)
 ##ax1.plot(detail_lines[0],detail_lines[1],label='detail_lines',color='#7cfc00', linewidth=0.5)
+######>>>>>>>>>  plots der detail_simple_lines
+detail_simple_lines = [[],[]]
+create_list_for_drawing(test.detail_simple_lines,detail_simple_lines)
+ax1.plot(detail_simple_lines[0],detail_simple_lines[1],label='detail_simple_lines',color='#7cfc00', linewidth=1.0)
+
+
 
 ######>>>>>>>>>  plots der simple_l1
 simple_line_l1 = [[],[]]
@@ -96,14 +93,14 @@ ax1.plot(simple_line_l3[0],simple_line_l3[1],label='level_3',color='#ff0000', li
 simple_line_l4 = [[],[]]
 create_list_for_drawing(test.simple_line_l4,simple_line_l4)
 ax1.plot(simple_line_l4[0],simple_line_l4[1],label='level_4',color='#4169e1', linewidth=3.0)
-####>>>>>>>>>  plots der simple_l5
-simple_line_l5 = [[],[]]
-create_list_for_drawing(test.simple_line_l5,simple_line_l5)
-ax1.plot(simple_line_l5[0],simple_line_l5[1],label='level_5',color='#ff1493', linewidth=4.0)
-######>>>>>>>>>  plots der simple_l6
-simple_line_l6 = [[],[]]
-create_list_for_drawing(test.simple_line_l6,simple_line_l6)
-ax1.plot(simple_line_l6[0],simple_line_l6[1],label='level_6',color='green', linewidth=2.0)
+######>>>>>>>>>  plots der simple_l5
+##simple_line_l5 = [[],[]]
+##create_list_for_drawing(test.simple_line_l5,simple_line_l5)
+##ax1.plot(simple_line_l5[0],simple_line_l5[1],label='level_5',color='#ff1493', linewidth=4.0)
+########>>>>>>>>>  plots der simple_l6
+##simple_line_l6 = [[],[]]
+##create_list_for_drawing(test.simple_line_l6,simple_line_l6)
+##ax1.plot(simple_line_l6[0],simple_line_l6[1],label='level_6',color='green', linewidth=2.0)
     
 
 for label in ax1.xaxis.get_ticklabels():
