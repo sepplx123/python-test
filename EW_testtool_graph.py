@@ -37,7 +37,7 @@ style.use('dark_background')
 
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
-#plot1 = candlestick_ohlc(ax1, data.ohlc, width=1.0, colorup='#77d879', colordown='#db3f3f', alpha=1.0)
+# plot1 = candlestick_ohlc(ax1, data.ohlc, width=1.0, colorup='#77d879', colordown='#db3f3f', alpha=1.0)
 
 
 
@@ -77,31 +77,36 @@ ax1.plot(detail_simple_lines[0],detail_simple_lines[1],label='detail_simple_line
 
 
 
-######>>>>>>>>>  plots der simple_l1
-simple_line_l1 = [[],[]]
-create_list_for_drawing(test.simple_line_l1,simple_line_l1)
-ax1.plot(simple_line_l1[0],simple_line_l1[1],label='level_1',color='white')
-######>>>>>>>>>  plots der simple_l2
-simple_line_l2 = [[],[]]
-create_list_for_drawing(test.simple_line_l2,simple_line_l2)
-ax1.plot(simple_line_l2[0],simple_line_l2[1],label='level_2',color='#ffd700', linewidth=1.0)
-####>>>>>>>>>  plots der simple_l3
-simple_line_l3 = [[],[]]
-create_list_for_drawing(test.simple_line_l3,simple_line_l3)
-ax1.plot(simple_line_l3[0],simple_line_l3[1],label='level_3',color='#ff0000', linewidth=1.0)
-##>>>>>>>>>  plots der simple_l4
-simple_line_l4 = [[],[]]
-create_list_for_drawing(test.simple_line_l4,simple_line_l4)
-ax1.plot(simple_line_l4[0],simple_line_l4[1],label='level_4',color='#4169e1', linewidth=3.0)
+########>>>>>>>>>  plots der simple_l1
+##simple_line_l1 = [[],[]]
+##create_list_for_drawing(test.simple_line_l1,simple_line_l1)
+##ax1.plot(simple_line_l1[0],simple_line_l1[1],label='level_1',color='white')
+########>>>>>>>>>  plots der simple_l2
+##simple_line_l2 = [[],[]]
+##create_list_for_drawing(test.simple_line_l2,simple_line_l2)
+##ax1.plot(simple_line_l2[0],simple_line_l2[1],label='level_2',color='#ffd700', linewidth=1.0)
+######>>>>>>>>>  plots der simple_l3
+##simple_line_l3 = [[],[]]
+##create_list_for_drawing(test.simple_line_l3,simple_line_l3)
+##ax1.plot(simple_line_l3[0],simple_line_l3[1],label='level_3',color='#ff0000', linewidth=1.0)
+####>>>>>>>>>  plots der simple_l4
+##simple_line_l4 = [[],[]]
+##create_list_for_drawing(test.simple_line_l4,simple_line_l4)
+##ax1.plot(simple_line_l4[0],simple_line_l4[1],label='level_4',color='#4169e1', linewidth=3.0)
 ######>>>>>>>>>  plots der simple_l5
 ##simple_line_l5 = [[],[]]
 ##create_list_for_drawing(test.simple_line_l5,simple_line_l5)
 ##ax1.plot(simple_line_l5[0],simple_line_l5[1],label='level_5',color='#ff1493', linewidth=4.0)
-########>>>>>>>>>  plots der simple_l6
+####>>>>>>>>>  plots der simple_l6
 ##simple_line_l6 = [[],[]]
 ##create_list_for_drawing(test.simple_line_l6,simple_line_l6)
 ##ax1.plot(simple_line_l6[0],simple_line_l6[1],label='level_6',color='green', linewidth=2.0)
-    
+####>>>>>>>>>  plots der simple_l7
+##simple_line_l7 = [[],[]]
+##create_list_for_drawing(test.simple_line_l7,simple_line_l7)
+##ax1.plot(simple_line_l7[0],simple_line_l7[1],label='level_7',color='white', linewidth=2.0)
+
+
 
 for label in ax1.xaxis.get_ticklabels():
     label.set_rotation(90)
