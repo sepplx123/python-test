@@ -20,39 +20,7 @@ import csv
 
 import fibonacci
 from EW_testtool_V01 import *
-
-################################       
-################################
-################################
-data = Database()
-test = Test(data.stock_data)
-
-
-
-#       plots
-################################       
-################################
-################################    test.raw_values
-style.use('dark_background')
-
-fig = plt.figure()
-ax1 = fig.add_subplot(111)
-# plot1 = candlestick_ohlc(ax1, data.ohlc, width=1.0, colorup='#77d879', colordown='#db3f3f', alpha=1.0)
-
-
-
-
-########>>>>>>>>>  plots der Innenstaebe 
-##for item in test.aussenstaebe_up_lim:
-##    ax1.plot(test.aussenstaebe_up_lim[item][0],test.aussenstaebe_up_lim[item][1],color='blue')
-##for item in test.aussenstaebe_low_lim:
-##    ax1.plot(test.aussenstaebe_low_lim[item][0],test.aussenstaebe_low_lim[item][1],color='blue')
-
-#####              BULLSHIT 
-########>>>>>>>>>  plots der lines
-##for item in test.line_coords:
-##    ax1.plot(test.line_coords[item][0],test.line_coords[item][1],label='Bullshit',color='#7cfc00')
-
+import EW_finder_V01
 
 def create_list_for_drawing(data_input, data_output):
     for item in data_input:
@@ -65,16 +33,53 @@ def create_list_for_drawing(data_input, data_output):
             data_output[0].append(data_input[item][2][1])
             data_output[1].append(data_input[item][3][1])
 
+################################       
+################################
+################################
+data = Database()
+test = Test(data.stock_data)
+ew_finder = EW_finder_V01.TEST(test.detail_view_lines)
+
+
+
+#       plots
+################################       
+################################
+################################    test.raw_values
+style.use('dark_background')
+
+fig = plt.figure()
+ax1 = fig.add_subplot(111)
+#plot1 = candlestick_ohlc(ax1, data.ohlc, width=1.0, colorup='#77d879', colordown='#db3f3f', alpha=1.0)
+
+
+########>>>>>>>>>  plots der Innenstaebe 
+##for item in test.aussenstaebe_up_lim:
+##    ax1.plot(test.aussenstaebe_up_lim[item][0],test.aussenstaebe_up_lim[item][1],color='blue')
+##for item in test.aussenstaebe_low_lim:
+##    ax1.plot(test.aussenstaebe_low_lim[item][0],test.aussenstaebe_low_lim[item][1],color='blue')
+
 
 ########>>>>>>>>>  plots der detail_lines
 ##detail_lines = [[],[]]
 ##create_list_for_drawing(test.detail_lines,detail_lines)
-##ax1.plot(detail_lines[0],detail_lines[1],label='detail_lines',color='#7cfc00', linewidth=0.5)
-######>>>>>>>>>  plots der detail_simple_lines
-detail_simple_lines = [[],[]]
-create_list_for_drawing(test.detail_simple_lines,detail_simple_lines)
-ax1.plot(detail_simple_lines[0],detail_simple_lines[1],label='detail_simple_lines',color='#7cfc00', linewidth=1.0)
+##ax1.plot(detail_lines[0],detail_lines[1],label='detail_lines',color='white', linewidth=0.5)
+#>>>>>>>>>  plots der detail_simple_lines
+##detail_view_lines = [[],[]]
+##create_list_for_drawing(test.detail_view_lines,detail_view_lines)
+##ax1.plot(detail_view_lines[0],detail_view_lines[1],label='detail_view_lines',color='#7cfc00', linewidth=1.0)
 
+
+######>>>>>>>>>  plots der EW_finder_V01 basis_waves
+for item in ew_finder.basis_waves:
+    if not item %2:
+        ax1.plot(ew_finder.basis_waves[item][2],ew_finder.basis_waves[item][3],color='white', linewidth=1.0)
+    else:
+        ax1.plot(ew_finder.basis_waves[item][2],ew_finder.basis_waves[item][3],color='orange', linewidth=1.0)
+
+######>>>>>>>>>  plots der EW_finder_V01 comb_lvl_1
+for item in ew_finder.comb_lvl_1:
+    ax1.plot(ew_finder.comb_lvl_1[item][2],ew_finder.comb_lvl_1[item][3],color='cyan', linewidth=1.5)
 
 
 ########>>>>>>>>>  plots der simple_l1
