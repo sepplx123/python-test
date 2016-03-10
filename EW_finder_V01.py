@@ -123,14 +123,15 @@ Retracement bis 23.6% vom Impuls
 """
 
 
-def ratio_hi_lo(value_1, value2):
+def ratio_hi_lo(value_1, value_2):
     """ checks wich value is higher and creates the ratio between
     higher value / lower_value and returns True/False for value_1 or value_2 and the ratio
-    return function: value_1>, value_2>, ratio(hi/lo) """
-    if value_1 > value2:
-        return True, False, value_1 / value2
+    
+    returned values: value_1>, value_2>, ratio(hi/lo) """
+    if value_1 > value_2:
+        return True, False, value_1 / value_2
     else:
-        return False, True, value_2 / value1
+        return False, True, value_2 / value_1
 
 
 
@@ -168,16 +169,20 @@ class TEST():
         
         self.comb_lvl_1 = {}
         self.comb_lvl_1_results = {}
+
+        self.comb_lvl_2 = {}
+        self.comb_lvl_2_results = {}        
         
-        self.ew_types_abc = EW_types_V01.ABC_Correction()
+        self.analyzer = EW_types_V01.Analyzer()
 
 
-        self.parse_database()
+        debug_flag = False
+        self.parse_database(debug_flag)
 
 
 
 
-    def parse_database(self):
+    def parse_database(self, debug_flag):
         """
         self.basis_waves = {}         # { "_line_id" : ["abc", "a_line - b_line - c_line", [X], [Y], [time_values], [price_values]] }
         self.basis_waves_results = {} # [ "_line_id" : [result b_a], [result c_b], [result c_a], valid True/False, [pattern type] }
@@ -253,38 +258,49 @@ class TEST():
                     #Step2: Send this zigzag to the analyzer modul and receive the result
                     #===> self.basis_waves[_line_id][4] = [time_values]
                     #===> self.basis_waves[_line_id][5] = [price_values]
-                    _testobject = [ self.basis_waves[_line_id][4], self.basis_waves[_line_id][5], ]
-                    self.basis_waves_results[_line_id] = self.ew_types_abc.check(_testobject)
+                    _testobject = [self.basis_waves[_line_id][4], self.basis_waves[_line_id][5]]
+                    #self.basis_waves_results[_line_id] = self.ew_types_abc.check(_testobject)
+                    self.basis_waves_results[_line_id] = self.analyzer.analyze(self.basis_waves[_line_id], debug_flag)
                     
 
                 #Step3: After the 2nd zigzag is finished we can try to combine the first 2 basis_waves to a new one ===> comb_lvl_1.
                 # This new wave can be either an abc or impulse pattern
                 if _line_id == 2 and not _line_in_progress:
-                    self.combine_basis_waves(self.basis_waves[_line_id-1], self.basis_waves[_line_id])
+                    self.comb_lvl_1, self.comb_lvl_1_results = self.combine_basis_waves(self.basis_waves[_line_id-1], self.basis_waves[_line_id], False)
 
 
-
-
-
-
-        print("##############################################   basis_waves   ##########################################################")
-        print("{0:>7} {1:<7} {2:<16} {3:<20} {4:<52} {5:<12} {6:<20}".format('[Index]', '[count]', '[included waves]', '[X]','[Y]', '[t_values]', '[p_values]'))
-        for item in self.basis_waves:
-            print("{0:>7} {1:<7} {2:<16} {3:<20} {4:<52} {5:<12} {6:<20}".format(item, self.basis_waves[item][0], self.basis_waves[item][1],
-                                                                                 self.basis_waves[item][2],self.basis_waves[item][3],
-                                                                                 self.basis_waves[item][4],self.basis_waves[item][5]))
+        print("############################################   self.comb_lvl_1_waves   #######################################################")
+        print("{0:>7} {1:<7} {2:<20} {3:<20} {4:<52} {5:<12} {6:<20}".format('[Index]', '[count]', '[included waves]', '[X]','[Y]', '[t_values]', '[p_values]'))
+        for item in self.comb_lvl_1:
+            print("{0:>7} {1:<7} {2:<20} {3:<20} {4:<52} {5:<12} {6:<20}".format(item, self.comb_lvl_1[item][0], self.comb_lvl_1[item][1],
+                                                                                 self.comb_lvl_1[item][2],self.comb_lvl_1[item][3],
+                                                                                 self.comb_lvl_1[item][4],self.comb_lvl_1[item][5]))
             try:
-                for element in self.basis_waves_results[item]:
-                    print("       {0:<60}".format(element))
+                for element in self.comb_lvl_1_results[item]:
+                    print("        {0:<60}".format(element))
             except:
                 pass
-        print("########################################################################################################################")
-        
+        print("##############################################################################################################################")
+
+
+
+
+##        print("###############################################   self.basis_waves   ##########################################################")
+##        print("{0:>7} {1:<7} {2:<16} {3:<20} {4:<52} {5:<12} {6:<20}".format('[Index]', '[count]', '[included waves]', '[X]','[Y]', '[t_values]', '[p_values]'))
+##        for item in self.basis_waves:
+##            print("{0:>7} {1:<7} {2:<16} {3:<20} {4:<52} {5:<12} {6:<20}".format(item, self.basis_waves[item][0], self.basis_waves[item][1],
+##                                                                                 self.basis_waves[item][2],self.basis_waves[item][3],
+##                                                                                 self.basis_waves[item][4],self.basis_waves[item][5]))
+##            try:
+##                for element in self.basis_waves_results[item]:
+##                    print("        {0:<60}".format(element))
+##            except:
+##                pass
+##        print("##############################################################################################################################")
+##
+
             
-
-                              
-
-    def combine_basis_waves(self, wave_1, wave_2):
+    def combine_basis_waves(self, wave_1, wave_2, debug_flag):
         """
         basis_wave:                                    ["abc", "a_line - b_line - c_line", [X], [Y], [time_values], [price_values]]
         self.comb_lvl_1 = {}          # { "_line_id" : ["abc", "a_line - b_line - c_line", [X], [Y], [time_values], [price_values]] }
@@ -298,8 +314,20 @@ class TEST():
                    If both corrective waves are almost equal, we have to create 2 new waves
             Step3: Create an impulse if the basis_waves fit to this pattern
 
-        case 2: down direction of a_wave in wave_1                 
+        case 2: down direction of a_wave in wave_1
+
+            Step1: see above
+            Step2: see above
+            Step3: see above
+
+        Step4: Only valid patterns can be accepted and returned
         """
+        
+        comb_lvl_1 = {}
+        comb_lvl_1_results = {}
+        output_data = {}
+        output_data_results = {}
+        
         _direction = ""
         _dom_wave1 = 0
         _dom_wave2 = 0
@@ -308,12 +336,13 @@ class TEST():
         _line_id = 0
         _line_in_progress = False
 
-        print('===>>>>>> Entering combine_basis_waves')
-
+        # create a direction flag of the first wave for further calculation purposes
         if wave_1[3][1] > wave_1[3][0]:
             _direction = str("up")
         else:
             _direction = str("down")
+
+
 
         # Case 1: up direction of a_wave in wave_1
         if _direction == "up":
@@ -323,28 +352,107 @@ class TEST():
 
                 # Step2: Find the dominant retracement wave (b_wave in wave_1 or a_wave in wave_2) and create a new abc pattern
                 #        If both corrective waves are almost equal, we have to create 2 new waves
-                # Also include time values for decide which one is the dominant wave !!!
                 _dom_wave1, _dom_wave2, _ratio = ratio_hi_lo(wave_1[5][1], wave_2[5][0])
-                
-                if _dom_wave1 and _ratio >= _trigger:
+
+
+                # Also include time values to decide which one is the dominant retracement wave !!!
+                if _dom_wave1 and _ratio >= _trigger and wave_1[4][1] >= wave_2[4][0]:
                     _line_id += 1
-                    _line_in_progress = True                
-                    self.comb_lvl_1[_line_id] = [ str("abc"),
-                                                  [wave_1[1][0], wave_1[1][1], [wave_1[1][2],wave_2[1][0],wave_2[1][1]]],
-                                                  [wave_1[2][0], wave_1[2][1], wave_1[2][2], wave_2[2][2]],
-                                                  [wave_1[3][0], wave_1[3][1], wave_1[3][2], wave_2[3][2]],
-                                                  [wave_1[4][0], wave_1[4][1], abs(wave_2[2][2] - wave_1[2][2]) +1],            # +1 damit man keine 0 im time_value hat
-                                                  [wave_1[5][0], wave_1[5][1], abs(wave_2[3][2] - wave_1[3][2])],
-                                                 ]
+                    #_line_in_progress = True                
+                    comb_lvl_1[_line_id] = [ str("abc"),
+                                            [wave_1[1][0], wave_1[1][1], [wave_1[1][2], wave_2[1][0], wave_2[1][1]] ],
+                                            [wave_1[2][0], wave_1[2][1], wave_1[2][2], wave_2[2][2] ],
+                                            [wave_1[3][0], wave_1[3][1], wave_1[3][2], wave_2[3][2] ],
+                                            [wave_1[4][0], wave_1[4][1], abs(wave_2[2][2] - wave_1[2][2]) +1 ],  # +1 damit man keine 0 im time_value hat
+                                            [wave_1[5][0], wave_1[5][1], abs(wave_2[3][2] - wave_1[3][2]) ],
+                                           ]
+                    # Send these combined waves to the analyzer modul and receive the result
+                    comb_lvl_1_results[_line_id] = self.analyzer.analyze(comb_lvl_1[_line_id], debug_flag)
 
-                elif _dom_wave2 and _ratio >= _trigger:
-                    pass
 
-    
+                elif _dom_wave2 and _ratio >= _trigger and wave_2[4][0] >= wave_1[4][1]:
+                    _line_id += 1
+                    #_line_in_progress = True                
+                    comb_lvl_1[_line_id] = [ str("abc"),
+                                            [wave_1[1], wave_2[1][0], wave_2[1][1] ],
+                                            [wave_1[2][0], wave_1[2][-1], wave_2[2][1], wave_2[2][2] ],
+                                            [wave_1[3][0], wave_1[3][-1], wave_2[3][1], wave_2[3][2] ],
+                                            [abs(wave_1[2][-1] - wave_1[2][0]) +1, wave_2[4][0], wave_2[4][1] ],  # +1 damit man keine 0 im time_value hat
+                                            [abs(wave_1[3][-1] - wave_1[3][0]), wave_2[5][0], wave_2[5][1] ],
+                                           ]
+                    # Send these combined waves to the analyzer modul and receive the result
+                    comb_lvl_1_results[_line_id] = self.analyzer.analyze(comb_lvl_1[_line_id], debug_flag)
+                    
                 else:
                     pass
                     
-        print('self.comb_lvl_1: ', self.comb_lvl_1[_line_id])                          
+
+                # Step3: Create an impulse/LDT/EDT if the basis_waves fit to this pattern
+                _line_id += 1
+                #_line_in_progress = True                
+                comb_lvl_1[_line_id] = [ str("12345"),
+                                        [wave_1[1][0], wave_1[1][1], wave_1[1][2], wave_2[1][0], wave_2[1][1]],
+                                        [wave_1[2][0], wave_1[2][1], wave_1[2][2], wave_1[2][3], wave_2[2][1], wave_2[2][2] ],
+                                        [wave_1[3][0], wave_1[3][1], wave_1[3][2], wave_1[3][3], wave_2[3][1], wave_2[3][2] ],
+                                        [wave_1[4][0], wave_1[4][1], wave_1[4][2], wave_2[4][0], wave_2[4][1] ],
+                                        [wave_1[5][0], wave_1[5][1], wave_1[5][2], wave_2[5][0], wave_2[5][1] ],
+
+                                       ]
+                # Send these combined waves to the analyzer modul and receive the result              
+                comb_lvl_1_results[_line_id] = self.analyzer.analyze(comb_lvl_1[_line_id], debug_flag)
+
+
+
+
+        # Case 2: down direction of a_wave in wave_1
+        if _direction == "down":
+            pass    
+
+
+
+
+
+
+        # Step4: Only valid patterns can be accepted and returned
+        # Check all results and only keep valid patterns and add them to the output_data
+        for item in comb_lvl_1_results:
+            for element in comb_lvl_1_results[item]:
+                if element[-2]:
+                    output_data[item] = comb_lvl_1[item]
+                    output_data_results[item] = element
+                    #print(output_data_results[item])
+
+
+##        print("############################################   temp_comb_lvl_1_waves   ########################################################")
+##        print("{0:>7} {1:<7} {2:<20} {3:<20} {4:<52} {5:<12} {6:<20}".format('[Index]', '[count]', '[included waves]', '[X]','[Y]', '[t_values]', '[p_values]'))
+##        for item in comb_lvl_1:
+##            print("{0:>7} {1:<7} {2:<20} {3:<20} {4:<52} {5:<12} {6:<20}".format(item, comb_lvl_1[item][0], comb_lvl_1[item][1],
+##                                                                                 comb_lvl_1[item][2],comb_lvl_1[item][3],
+##                                                                                 comb_lvl_1[item][4],comb_lvl_1[item][5]))
+##            try:
+##                for element in comb_lvl_1_results[item]:
+##                    print("        {0:<60}".format(element))
+##            except:
+##                pass
+##        print("##############################################################################################################################")
+##
+##
+##        print("################################################   output_data   #############################################################")
+##        print("{0:>7} {1:<7} {2:<20} {3:<20} {4:<52} {5:<12} {6:<20}".format('[Index]', '[count]', '[included waves]', '[X]','[Y]', '[t_values]', '[p_values]'))
+##        for item in output_data:
+##            print("{0:>7} {1:<7} {2:<20} {3:<20} {4:<52} {5:<12} {6:<20}".format(item, output_data[item][0], output_data[item][1],
+##                                                                                 output_data[item][2],output_data[item][3],
+##                                                                                 output_data[item][4],output_data[item][5]))
+##            try:
+##                for element in output_data_results[item]:
+##                    print("        {0:<60}".format(element))
+##            except:
+##                pass
+##        print("##############################################################################################################################")
+        
+        return output_data, output_data_results
+
+
 
 ############
 if __name__ == "__main__":
