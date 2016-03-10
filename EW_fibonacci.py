@@ -101,30 +101,3 @@ if __name__ == "__main__":
     p = check_fibratio(test_p[2], test_p[0])
     print(p)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
