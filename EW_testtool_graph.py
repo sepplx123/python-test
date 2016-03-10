@@ -79,7 +79,10 @@ for item in ew_finder.basis_waves:
 
 ######>>>>>>>>>  plots der EW_finder_V01 comb_lvl_1
 for item in ew_finder.comb_lvl_1:
-    ax1.plot(ew_finder.comb_lvl_1[item][2],ew_finder.comb_lvl_1[item][3],color='cyan', linewidth=1.5)
+    if len(ew_finder.comb_lvl_1[item][2]) == 4:
+        ax1.plot(ew_finder.comb_lvl_1[item][2],ew_finder.comb_lvl_1[item][3],color='blue', linewidth=1.5)
+    if len(ew_finder.comb_lvl_1[item][2]) == 6:
+        ax1.plot(ew_finder.comb_lvl_1[item][2],ew_finder.comb_lvl_1[item][3],color='red', linewidth=1.5)    
 
 
 ########>>>>>>>>>  plots der simple_l1
