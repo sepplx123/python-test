@@ -167,8 +167,8 @@ class Analyzer():
         123456789   ==> 9 waves ==> Triangle (9 Waves ABCDEFGHI) 
         """
         _result = []
-        _testobject = []
-        _temp = []
+        _testobject = 0
+        _temp = 0
 
         if debug_flag:
             print("______class Analyzer().analyze______item to check:")
@@ -757,7 +757,7 @@ class Impulse():
         
         _result = []
         _temp = 0
-        _offset = 0.2        
+        _offset = 0.05        
         _wave1_t = data_input[0][0]
         _wave2_t = data_input[0][1]
         _wave3_t = data_input[0][2]
@@ -1023,7 +1023,7 @@ class Leading_Diagonal():
         """
         _result = []
         _temp = 0
-        _offset = 0.25        
+        _offset = 0.10        
         _wave1_t = data_input[0][0]
         _wave2_t = data_input[0][1]
         _wave3_t = data_input[0][2]
@@ -1312,7 +1312,7 @@ class Ending_Diagonal():
         """
         _result = []
         _temp = 0
-        _offset = 0.25        
+        _offset = 0.10        
         _wave1_t = data_input[0][0]
         _wave2_t = data_input[0][1]
         _wave3_t = data_input[0][2]
